@@ -19,6 +19,7 @@
 
 #include <bluevk/BlueVK.h>
 
+#include "VulkanBinder.h"
 #include "VulkanDisposer.h"
 
 #include <utils/Condition.h>
@@ -36,9 +37,6 @@ struct VulkanCmdFence {
     utils::Condition condition;
     utils::Mutex mutex;
     std::atomic<VkResult> status;
-
-    bool swapChainDestroyed = false; // TODO: remove
-    bool submitted = false; // TODO: remove
 };
 
 // The submission fence has shared ownership semantics because it is potentially wrapped by a
@@ -48,13 +46,14 @@ struct VulkanCommandBuffer {
     VkCommandBuffer cmdbuffer;
     std::shared_ptr<VulkanCmdFence> fence;
     VkSemaphore renderingFinished;
-    VulkanDisposer::Set resources; // TODO: remove
+    VulkanDisposer::Set resources; // TODO: remove this, instead auto-dispose after 3 swaps.
 };
 
 // Lazily creates command buffers and manages a set of submitted command buffers.
 class VulkanCommands {
     public:
-        VulkanCommands(VkDevice device, uint32_t queueFamilyIndex);
+        VulkanCommands(VkDevice device, uint32_t queueFamilyIndex, VulkanBinder& binder,
+                VulkanDisposer& disposer);
         ~VulkanCommands();
 
         // Creates a "current" command buffer if none exists, otherwise returns the current one.
@@ -62,7 +61,7 @@ class VulkanCommands {
 
         // Submits the current command buffer if it exists, then sets "current" to null.
         // If a semaphore is provided, then the GPU will wait on its signal.
-        void submit(VkSemaphore imageAvailable = VK_NULL_HANDLE);
+        void flush(VkSemaphore imageAvailable = VK_NULL_HANDLE);
 
         // Returns the completion semaphore associated with the most recent submission.
         // NOTE: This is not the semaphore that was passed in to submit.
@@ -74,9 +73,18 @@ class VulkanCommands {
         // Waits for all outstanding command buffers to finish.
         void wait();
 
+        // Updates the atomic "status" variable in every extant fence.
+        void updateFences();
+
+        // Adds the given resource to the resource list of every extant command buffer.
+        // TODO: remove this, instead auto-dispose after 3 swaps.
+        void addReference(void* resource);
+
     private:
         static constexpr int CAPACITY = 8;
         const VkDevice mDevice;
+        VulkanBinder& mBinder;
+        VulkanDisposer& mDisposer; // TODO: remove this, instead auto-dispose after 3 swaps.
         VkQueue mQueue;
         VkCommandPool mPool;
         VulkanCommandBuffer* mCurrent = nullptr;

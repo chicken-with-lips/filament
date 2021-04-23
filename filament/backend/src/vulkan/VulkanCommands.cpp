@@ -33,13 +33,18 @@ VulkanCmdFence::VulkanCmdFence(VkDevice device, bool signaled) : device(device) 
         fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
     }
     vkCreateFence(device, &fenceCreateInfo, VKALLOC, &fence);
+
+    // Internally we use the VK_INCOMPLETE status to mean "not yet submitted".
+    // When this fence gets submitted, its status changes to VK_NOT_READY.
+    status.store(VK_INCOMPLETE);
 }
 
  VulkanCmdFence::~VulkanCmdFence() {
     vkDestroyFence(device, fence, VKALLOC);
 }
 
-VulkanCommands::VulkanCommands(VkDevice device, uint32_t queueFamilyIndex) : mDevice(device) {
+VulkanCommands::VulkanCommands(VkDevice device, uint32_t queueFamilyIndex, VulkanBinder& binder,
+                VulkanDisposer& disposer) : mDevice(device), mBinder(binder), mDisposer(disposer) {
     VkCommandPoolCreateInfo createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
     createInfo.flags =
@@ -89,11 +94,23 @@ VulkanCommandBuffer& VulkanCommands::get() {
     // Begin writing into the command buffer.
     vkBeginCommandBuffer(mCurrent->cmdbuffer, &binfo);
 
+    // vkCmdBindPipeline and vkCmdBindDescriptorSets establish bindings to a specific command
+    // buffer; they are not global to the device. Since VulkanBinder doesn't have context about the
+    // current command buffer, we need to reset its bindings after swapping over to a new command
+    // buffer. Note that the following reset causes us to issue a few more vkBind* calls than
+    // strictly necessary, but only in the first draw call of the frame. Alteneratively we could
+    // enhance VulkanBinder by adding a mapping from command buffers to bindings, but this would
+    // introduce complexity that doesn't seem worthwhile. Yet another design would be to instance a
+    // separate VulkanBinder for each element in the swap chain, which would also have the benefit
+    // of allowing us to safely mutate descriptor sets. For now we're avoiding that strategy in the
+    // interest of maintaining a small memory footprint.
+    mBinder.resetBindings();
+
     return *mCurrent;
 }
 
-void VulkanCommands::submit(VkSemaphore imageAvailable) {
-    // It's perfectly fine to call submit when no commands have been written.
+void VulkanCommands::flush(VkSemaphore imageAvailable) {
+    // It's perfectly fine to call flush when no commands have been written.
     if (mCurrent == nullptr) {
         return;
     }
@@ -117,6 +134,7 @@ void VulkanCommands::submit(VkSemaphore imageAvailable) {
 
     auto& cmdfence = mCurrent->fence;
     std::unique_lock<utils::Mutex> lock(cmdfence->mutex);
+    cmdfence->status.store(VK_NOT_READY);
     vkQueueSubmit(mQueue, 1, &submitInfo, cmdfence->fence);
     lock.unlock();
     cmdfence->condition.notify_all();
@@ -137,6 +155,8 @@ void VulkanCommands::gc() {
                 if (mLatestSubmission == &wrapper) {
                     mLatestSubmission = nullptr;
                 }
+
+                mDisposer.release(wrapper.resources);
 
                 vkDestroySemaphore(mDevice, wrapper.renderingFinished, VKALLOC);
                 wrapper.renderingFinished = VK_NULL_HANDLE;
@@ -160,6 +180,27 @@ void VulkanCommands::wait() {
     }
     if (count > 0) {
         vkWaitForFences(mDevice, count, fences, VK_TRUE, UINT64_MAX);
+    }
+}
+
+void VulkanCommands::updateFences() {
+    for (auto& wrapper : mStorage) {
+        if (wrapper.cmdbuffer != VK_NULL_HANDLE) {
+            VulkanCmdFence* fence = wrapper.fence.get();
+            if (fence) {
+                VkResult status = vkGetFenceStatus(mDevice, fence->fence);
+                // This is either VK_SUCCESS, VK_NOT_READY, or VK_ERROR_DEVICE_LOST.
+                fence->status.store(status, std::memory_order_relaxed);
+            }
+        }
+    }
+}
+
+void VulkanCommands::addReference(void* resource) {
+    for (auto& wrapper : mStorage) {
+        if (wrapper.cmdbuffer != VK_NULL_HANDLE) {
+            mDisposer.acquire(resource, wrapper.resources);
+        }
     }
 }
 

@@ -82,19 +82,13 @@ struct VulkanContext {
     bool debugUtilsSupported;
     bool portabilitySubsetSupported;
     VulkanBinder::RasterState rasterState;
-    VulkanCommandBuffer* currentCommands;
     VulkanSurfaceContext* currentSurface;
     VulkanRenderPass currentRenderPass;
     VkViewport viewport;
     VkFormat finalDepthFormat;
     VmaAllocator allocator;
     VulkanTexture* emptyTexture = nullptr;
-
-    // The work context is used for activities unrelated to the swap chain or draw calls, such as
-    // uploads, blits, and transitions.
-    VulkanCommandBuffer work;
-
-    VulkanCommands* commands;
+    VulkanCommands* commands = nullptr;
 };
 
 struct VulkanAttachment {
@@ -108,14 +102,6 @@ struct VulkanAttachment {
     uint16_t layer;
 };
 
-// The SwapContext is the set of objects that gets "swapped" at each beginFrame().
-// Typically there are only 2 or 3 instances of the SwapContext per SwapChain.
-struct SwapContext {
-    VulkanAttachment attachment;
-    VulkanCommandBuffer commands;
-    bool invalid;
-};
-
 // The SurfaceContext stores various state (including the swap chain) that we tightly associate
 // with VkSurfaceKHR, which is basically one-to-one with a platform-specific window.
 struct VulkanSurfaceContext {
@@ -127,12 +113,12 @@ struct VulkanSurfaceContext {
     std::vector<VkSurfaceFormatKHR> surfaceFormats;
     VkQueue presentQueue;
     VkQueue headlessQueue;
-    std::vector<SwapContext> swapContexts;
+    std::vector<VulkanAttachment> attachments;
     uint32_t currentSwapIndex;
     VkSemaphore imageAvailable;
-    VkSemaphore renderingFinished;
     VulkanAttachment depth;
     bool suboptimal;
+    bool firstRenderPass; // TODO: set this to "true" in commit
 };
 
 void selectPhysicalDevice(VulkanContext& context);
@@ -145,15 +131,11 @@ void destroySwapChain(VulkanContext& context, VulkanSurfaceContext& sc, VulkanDi
 void makeSwapChainPresentable(VulkanContext& context);
 
 uint32_t selectMemoryType(VulkanContext& context, uint32_t flags, VkFlags reqs);
-SwapContext& getSwapContext(VulkanContext& context);
+VulkanAttachment& getSwapChainAttachment(VulkanContext& context);
 void waitForIdle(VulkanContext& context);
-bool acquireSwapCommandBuffer(VulkanContext& context);
-void releaseCommandBuffer(VulkanContext& context);
-void flushCommandBuffer(VulkanContext& context);
+bool acquireSwapChain(VulkanContext& context);
 VkFormat findSupportedFormat(VulkanContext& context, const std::vector<VkFormat>& candidates,
         VkImageTiling tiling, VkFormatFeatureFlags features);
-VkCommandBuffer acquireWorkCommandBuffer(VulkanContext& context);
-void flushWorkCommandBuffer(VulkanContext& context);
 void createFinalDepthBuffer(VulkanContext& context, VulkanSurfaceContext& sc, VkFormat depthFormat);
 VkImageLayout getTextureLayout(TextureUsage usage);
 void createEmptyTexture(VulkanContext& context, VulkanStagePool& stagePool);

@@ -210,6 +210,10 @@ VulkanDriver::VulkanDriver(VulkanPlatform* platform,
 
     // Initialize device and graphicsQueue.
     createLogicalDevice(mContext);
+
+    mContext.commands = new VulkanCommands(mContext.device, mContext.graphicsQueueFamilyIndex,
+            mBinder, mDisposer);
+
     mBinder.setDevice(mContext.device);
     createEmptyTexture(mContext, mStagePool);
 
@@ -263,25 +267,13 @@ void VulkanDriver::terminate() {
     }
 
     delete mContext.commands;
-
-    // Flush the work command buffer.
-    acquireWorkCommandBuffer(mContext);
-
     delete mContext.emptyTexture;
 
     mBlitter.shutdown();
 
-    mDisposer.release(mContext.work.resources);
-
     // Allow the stage pool and disposer to clean up.
     mStagePool.gc();
     mDisposer.reset();
-
-    // Destroy the work command buffer and fence.
-    VulkanCommandBuffer& work = mContext.work;
-    VkDevice device = mContext.device;
-    vkFreeCommandBuffers(device, mContext.commandPool, 1, &work.cmdbuffer);
-    work.fence.reset();
 
     mStagePool.reset();
     mBinder.destroyCache();
@@ -304,82 +296,16 @@ void VulkanDriver::terminate() {
 }
 
 void VulkanDriver::tick(int) {
-    if (!mContext.currentSurface) {
-        return;
-    }
-    for (SwapContext& sc : mContext.currentSurface->swapContexts) {
-        VulkanCmdFence* fence = sc.commands.fence.get();
-        if (fence) {
-            VkResult status = vkGetFenceStatus(mContext.device, fence->fence);
-            fence->status.store(status, std::memory_order_relaxed);
-        }
-    }
-}
-
-void VulkanDriver::beginFrame(int64_t monotonic_clock_ns, uint32_t frameId) {
-    // We allow multiple beginFrame / endFrame pairs before commit(), so gracefully return early
-    // if the swap chain has already been acquired.
-    if (mContext.currentCommands) {
-        return;
-    }
-
-    // After each command buffer acquisition, we know that the previous submission of the acquired
-    // command buffer has finished, so we can decrement the refcount for each of its referenced
-    // resources.
-
-    acquireWorkCommandBuffer(mContext);
-    mDisposer.release(mContext.work.resources);
-
-    // With MoltenVK, it might take several attempts to acquire a swap chain that is not marked as
-    // "out of date" after a resize event.
-    int attempts = 0;
-    while (!acquireSwapCommandBuffer(mContext)) {
-        refreshSwapChain();
-        if (attempts++ > SWAP_CHAIN_MAX_ATTEMPTS) {
-            PANIC_POSTCONDITION("Unable to acquire image from swap chain.");
-        }
-    }
-
-    #ifdef ANDROID
-    // Polling VkSurfaceCapabilitiesKHR is the most reliable way to detect a rotation change on
-    // Android. Checking for VK_SUBOPTIMAL_KHR is not sufficient on pre-Android 10 devices. Even
-    // on Android 10, we cannot rely on SUBOPTIMAL because we always use IDENTITY for the
-    // preTransform field in VkSwapchainCreateInfoKHR (see other comment in createSwapChain).
-    //
-    // NOTE: we support apps that have "orientation|screenSize" enabled in android:configChanges.
-    //
-    // NOTE: we poll the currentExtent rather than currentTransform. The transform seems to change
-    // before the extent (on a Pixel 4 anyway), which causes us to create a badly sized VkSwapChain.
-    const VulkanSurfaceContext* surface = mContext.currentSurface;
-    VkSurfaceCapabilitiesKHR caps;
-    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(mContext.physicalDevice, surface->surface, &caps);
-    const VkExtent2D previous = surface->surfaceCapabilities.currentExtent;
-    const VkExtent2D current = caps.currentExtent;
-    if (current.width != previous.width || current.height != previous.height) {
-        refreshSwapChain();
-        acquireSwapCommandBuffer(mContext);
-    }
-    #endif
-
-    mDisposer.release(mContext.currentCommands->resources);
-
-    // vkCmdBindPipeline and vkCmdBindDescriptorSets establish bindings to a specific command
-    // buffer; they are not global to the device. Since VulkanBinder doesn't have context about the
-    // current command buffer, we need to reset its bindings after swapping over to a new command
-    // buffer. Note that the following reset causes us to issue a few more vkBind* calls than
-    // strictly necessary, but only in the first draw call of the frame. Alteneratively we could
-    // enhance VulkanBinder by adding a mapping from command buffers to bindings, but this would
-    // introduce complexity that doesn't seem worthwhile. Yet another design would be to instance a
-    // separate VulkanBinder for each element in the swap chain, which would also have the benefit
-    // of allowing us to safely mutate descriptor sets. For now we're avoiding that strategy in the
-    // interest of maintaining a small memory footprint.
-    mBinder.resetBindings();
-
-    // Free old unused objects.
     mStagePool.gc();
     mFramebufferCache.gc();
     mBinder.gc();
     mDisposer.gc();
+    mContext.commands->gc();
+    mContext.commands->updateFences();
+}
+
+void VulkanDriver::beginFrame(int64_t monotonic_clock_ns, uint32_t frameId) {
+    // Do nothing.
 }
 
 void VulkanDriver::setFrameScheduledCallback(Handle<HwSwapChain> sch,
@@ -400,11 +326,13 @@ void VulkanDriver::endFrame(uint32_t frameId) {
 }
 
 void VulkanDriver::flush(int) {
-    // Todo: equivalent of glFlush()
+    mContext.commands->flush(mContext.currentSurface ?
+            mContext.currentSurface->imageAvailable : VK_NULL_HANDLE);
 }
 
-void VulkanDriver::finish(int) {
-    // Todo: equivalent of glFinish()
+void VulkanDriver::finish(int dummy) {
+    flush(dummy);
+    mContext.commands->wait();
 }
 
 void VulkanDriver::createSamplerGroupR(Handle<HwSamplerGroup> sbh, size_t count) {
@@ -427,11 +355,7 @@ void VulkanDriver::destroyUniformBuffer(Handle<HwUniformBuffer> ubh) {
 
         // We do not know if any pending draw calls are making use of this uniform buffer,
         // so assume the worst: that all command buffers are all using it.
-        if (mContext.currentSurface) {
-            for (auto& swapContext : mContext.currentSurface->swapContexts) {
-                mDisposer.acquire(buffer, swapContext.commands.resources);
-            }
-        }
+        mContext.commands->addReference(buffer);
 
         mDisposer.removeReference(buffer);
     }
@@ -592,21 +516,13 @@ void VulkanDriver::destroyRenderTarget(Handle<HwRenderTarget> rth) {
 }
 
 void VulkanDriver::createFenceR(Handle<HwFence> fh, int) {
-    // We prefer the fence to be created inside a frame, otherwise there's no command buffer.
-    assert_invariant(mContext.currentCommands != nullptr && "Fences should be created within a frame.");
-
-     // As a fallback in release builds, trigger the fence based on the work command buffer.
-    if (mContext.currentCommands == nullptr) {
-        construct_handle<VulkanFence>(mHandleMap, fh, mContext.work);
-        return;
-    }
-
-     construct_handle<VulkanFence>(mHandleMap, fh, *mContext.currentCommands);
+    VulkanCommandBuffer& commandBuffer = mContext.commands->get();
+    construct_handle<VulkanFence>(mHandleMap, fh, commandBuffer);
 }
 
 void VulkanDriver::createSyncR(Handle<HwSync> sh, int) {
-    ASSERT_PRECONDITION(mContext.currentCommands, "Syncs must be created within a frame.");
-    construct_handle<VulkanSync>(mHandleMap, sh, *mContext.currentCommands);
+    VulkanCommandBuffer& commandBuffer = mContext.commands->get();
+    construct_handle<VulkanSync>(mHandleMap, sh, commandBuffer);
 }
 
 void VulkanDriver::createSwapChainR(Handle<HwSwapChain> sch, void* nativeWindow, uint64_t flags) {
@@ -786,17 +702,15 @@ void VulkanDriver::destroyFence(Handle<HwFence> fh) {
 FenceStatus VulkanDriver::wait(Handle<HwFence> fh, uint64_t timeout) {
     auto& cmdfence = handle_cast<VulkanFence>(mHandleMap, fh)->fence;
 
-    // The condition variable is used only to guarantee that we're calling vkWaitForFences *after*
-    // calling vkQueueSubmit.
+    // Internally we use the VK_INCOMPLETE status to mean "not yet submitted".
+    // When this fence gets submitted, its status changes to VK_NOT_READY.
     std::unique_lock<utils::Mutex> lock(cmdfence->mutex);
-    if (!cmdfence->submitted) {
+    if (cmdfence->status.load() == VK_INCOMPLETE) {
+        // This will obviously timeout if Filament creates a fence and immediately waits on it
+        // without calling endFrame() or commit().
         cmdfence->condition.wait(lock);
-        assert_invariant(cmdfence->submitted);
     } else {
         lock.unlock();
-    }
-    if (cmdfence->swapChainDestroyed) {
-        return FenceStatus::ERROR;
     }
     VkResult result = vkWaitForFences(mContext.device, 1, &cmdfence->fence, VK_TRUE, timeout);
     return result == VK_SUCCESS ? FenceStatus::CONDITION_SATISFIED : FenceStatus::TIMEOUT_EXPIRED;
@@ -973,15 +887,15 @@ SyncStatus VulkanDriver::getSyncStatus(Handle<HwSync> sh) {
     if (sync->fence == nullptr) {
         return SyncStatus::NOT_SIGNALED;
     }
-    if (sync->fence->swapChainDestroyed) {
-        return SyncStatus::ERROR;
-    }
     VkResult status = sync->fence->status.load(std::memory_order_relaxed);
     switch (status) {
         case VK_SUCCESS: return SyncStatus::SIGNALED;
+        case VK_INCOMPLETE: return SyncStatus::NOT_SIGNALED;
         case VK_NOT_READY: return SyncStatus::NOT_SIGNALED;
-        default: return SyncStatus::ERROR;
+        case VK_ERROR_DEVICE_LOST: return SyncStatus::ERROR;
     }
+    // NOTE: In theory, the fence status must be one of the above values.
+    return SyncStatus::ERROR;
 }
 
 void VulkanDriver::setExternalImage(Handle<HwTexture> th, void* image) {
@@ -1029,8 +943,9 @@ void VulkanDriver::beginRenderPass(Handle<HwRenderTarget> rth, const RenderPassP
     // first render pass. Note however that its contents are often preserved on subsequent render
     // passes, due to multiple views.
     TargetBufferFlags discardStart = params.flags.discardStart;
-    if (rt->invalidate()) {
+    if (rt->isSwapChain() && surface.firstRenderPass) {
         discardStart |= TargetBufferFlags::COLOR;
+        surface.firstRenderPass = false;
     }
 
     // Create the VkRenderPass or fetch it from cache.
@@ -1088,10 +1003,11 @@ void VulkanDriver::beginRenderPass(Handle<HwRenderTarget> rth, const RenderPassP
     VkFramebuffer vkfb = mFramebufferCache.getFramebuffer(fbkey);
 
     // The current command buffer now owns a reference to the render target and its attachments.
-    mDisposer.acquire(rt, mContext.currentCommands->resources);
-    mDisposer.acquire(depth.texture, mContext.currentCommands->resources);
+    auto& commands = mContext.commands->get();
+    mDisposer.acquire(rt, commands.resources);
+    mDisposer.acquire(depth.texture, commands.resources);
     for (int i = 0; i < MRT::MAX_SUPPORTED_RENDER_TARGET_COUNT; i++) {
-        mDisposer.acquire(rt->getColor(i).texture, mContext.currentCommands->resources);
+        mDisposer.acquire(rt->getColor(i).texture, commands.resources);
     }
 
     // Populate the structures required for vkCmdBeginRenderPass.
@@ -1133,9 +1049,8 @@ void VulkanDriver::beginRenderPass(Handle<HwRenderTarget> rth, const RenderPassP
     }
     renderPassInfo.pClearValues = &clearValues[0];
 
-    const SwapContext& swapContext = surface.swapContexts[surface.currentSwapIndex];
-
-    vkCmdBeginRenderPass(swapContext.commands.cmdbuffer, &renderPassInfo,
+    const VkCommandBuffer cmdbuffer = mContext.commands->get().cmdbuffer;
+    vkCmdBeginRenderPass(cmdbuffer, &renderPassInfo,
             VK_SUBPASS_CONTENTS_INLINE);
 
     VkViewport viewport = mContext.viewport = {
@@ -1148,7 +1063,7 @@ void VulkanDriver::beginRenderPass(Handle<HwRenderTarget> rth, const RenderPassP
     };
 
     mCurrentRenderTarget->transformClientRectToPlatform(&viewport);
-    vkCmdSetViewport(swapContext.commands.cmdbuffer, 0, 1, &viewport);
+    vkCmdSetViewport(cmdbuffer, 0, 1, &viewport);
 
     mContext.currentRenderPass = {
         .renderPass = renderPassInfo.renderPass,
@@ -1161,7 +1076,7 @@ void VulkanDriver::endRenderPass(int) {
     assert_invariant(mContext.currentCommands);
     assert_invariant(mContext.currentSurface);
     assert_invariant(mCurrentRenderTarget);
-    vkCmdEndRenderPass(mContext.currentCommands->cmdbuffer);
+    vkCmdEndRenderPass(mContext.commands->get().cmdbuffer);
     mCurrentRenderTarget = VK_NULL_HANDLE;
     if (mContext.currentRenderPass.currentSubpass > 0) {
         for (uint32_t i = 0; i < VulkanBinder::TARGET_BINDING_COUNT; i++) {
@@ -1181,7 +1096,7 @@ void VulkanDriver::nextSubpass(int) {
     assert_invariant(mCurrentRenderTarget);
     assert_invariant(mContext.currentRenderPass.subpassMask);
 
-    vkCmdNextSubpass(mContext.currentCommands->cmdbuffer, VK_SUBPASS_CONTENTS_INLINE);
+    vkCmdNextSubpass(mContext.commands->get().cmdbuffer, VK_SUBPASS_CONTENTS_INLINE);
 
     mBinder.bindRenderPass(mContext.currentRenderPass.renderPass,
             ++mContext.currentRenderPass.currentSubpass);
@@ -1221,6 +1136,37 @@ void VulkanDriver::makeCurrent(Handle<HwSwapChain> drawSch, Handle<HwSwapChain> 
                                   "Vulkan driver does not support distinct draw/read swap chains.");
     VulkanSurfaceContext& sContext = handle_cast<VulkanSwapChain>(mHandleMap, drawSch)->surfaceContext;
     mContext.currentSurface = &sContext;
+
+    // With MoltenVK, it might take several attempts to acquire a swap chain that is not marked as
+    // "out of date" after a resize event.
+    int attempts = 0;
+    while (!acquireSwapChain(mContext)) {
+        refreshSwapChain();
+        if (attempts++ > SWAP_CHAIN_MAX_ATTEMPTS) {
+            PANIC_POSTCONDITION("Unable to acquire image from swap chain.");
+        }
+    }
+
+    #ifdef ANDROID
+    // Polling VkSurfaceCapabilitiesKHR is the most reliable way to detect a rotation change on
+    // Android. Checking for VK_SUBOPTIMAL_KHR is not sufficient on pre-Android 10 devices. Even
+    // on Android 10, we cannot rely on SUBOPTIMAL because we always use IDENTITY for the
+    // preTransform field in VkSwapchainCreateInfoKHR (see other comment in createSwapChain).
+    //
+    // NOTE: we support apps that have "orientation|screenSize" enabled in android:configChanges.
+    //
+    // NOTE: we poll the currentExtent rather than currentTransform. The transform seems to change
+    // before the extent (on a Pixel 4 anyway), which causes us to create a badly sized VkSwapChain.
+    const VulkanSurfaceContext* surface = mContext.currentSurface;
+    VkSurfaceCapabilitiesKHR caps;
+    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(mContext.physicalDevice, surface->surface, &caps);
+    const VkExtent2D previous = surface->surfaceCapabilities.currentExtent;
+    const VkExtent2D current = caps.currentExtent;
+    if (current.width != previous.width || current.height != previous.height) {
+        refreshSwapChain();
+        acquireSwapCommandBuffer(mContext);
+    }
+    #endif
 }
 
 void VulkanDriver::commit(Handle<HwSwapChain> sch) {
@@ -1240,7 +1186,7 @@ void VulkanDriver::commit(Handle<HwSwapChain> sch) {
     // Submit the command buffer.
     VkPipelineStageFlags waitDestStageMask = VK_PIPELINE_STAGE_TRANSFER_BIT;
     VulkanSurfaceContext& surfaceContext = *mContext.currentSurface;
-    SwapContext& swapContext = getSwapContext(mContext);
+    SwapContext& swapContext = getSwapChainAttachment(mContext);
     VkSubmitInfo submitInfo {
             .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
             .waitSemaphoreCount = 1u,
