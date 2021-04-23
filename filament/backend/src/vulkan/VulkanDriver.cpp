@@ -22,6 +22,7 @@
 #include "VulkanDriverFactory.h"
 #include "VulkanHandles.h"
 #include "VulkanPlatform.h"
+#include "VulkanCommands.h"
 
 #include <utils/Panic.h>
 #include <utils/CString.h>
@@ -260,6 +261,8 @@ void VulkanDriver::terminate() {
     if (!mContext.instance) {
         return;
     }
+
+    delete mContext.commands;
 
     // Flush the work command buffer.
     acquireWorkCommandBuffer(mContext);

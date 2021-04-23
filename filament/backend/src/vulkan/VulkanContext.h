@@ -18,6 +18,7 @@
 #define TNT_FILAMENT_DRIVER_VULKANCONTEXT_H
 
 #include "VulkanBinder.h"
+#include "VulkanCommands.h"
 #include "VulkanDisposer.h"
 
 #include <backend/DriverEnums.h>
@@ -51,32 +52,6 @@ struct VulkanRenderTarget;
 struct VulkanSurfaceContext;
 struct VulkanTexture;
 class VulkanStagePool;
-
-// This wrapper exists so that we can use shared_ptr to implement shared ownership for low-level
-// Vulkan fences.
-struct VulkanCmdFence {
-    VulkanCmdFence(VkDevice device, bool signaled = false);
-    ~VulkanCmdFence();
-    const VkDevice device;
-    VkFence fence;
-    utils::Condition condition;
-    utils::Mutex mutex;
-    std::atomic<VkResult> status;
-    bool swapChainDestroyed = false;
-
-    // TODO: for non-work buffers the following field indicates if the fence has EVER been
-    // submitted, which is a bit misleading or un-useful. This needs to be refactored.
-    bool submitted = false;
-};
-
- // The submission fence has shared ownership semantics because it is potentially wrapped by a
-// DriverApi fence object and should not be destroyed until both the DriverAPI object is freed and
-// we're done waiting on the most recent submission of the given command buffer.
-struct VulkanCommandBuffer {
-    VkCommandBuffer cmdbuffer;
-    std::shared_ptr<VulkanCmdFence> fence;
-    VulkanDisposer::Set resources;
-};
 
 struct VulkanTimestamps {
     VkQueryPool pool;
@@ -118,6 +93,8 @@ struct VulkanContext {
     // The work context is used for activities unrelated to the swap chain or draw calls, such as
     // uploads, blits, and transitions.
     VulkanCommandBuffer work;
+
+    VulkanCommands* commands;
 };
 
 struct VulkanAttachment {

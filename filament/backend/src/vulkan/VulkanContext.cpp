@@ -37,18 +37,6 @@ using namespace bluevk;
 namespace filament {
 namespace backend {
 
-VulkanCmdFence::VulkanCmdFence(VkDevice device, bool signaled) : device(device) {
-    VkFenceCreateInfo fenceCreateInfo { .sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO };
-    if (signaled) {
-        fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-    }
-    vkCreateFence(device, &fenceCreateInfo, VKALLOC, &fence);
-}
-
- VulkanCmdFence::~VulkanCmdFence() {
-    vkDestroyFence(device, fence, VKALLOC);
-}
-
 void selectPhysicalDevice(VulkanContext& context) {
     uint32_t physicalDeviceCount = 0;
     VkResult result = vkEnumeratePhysicalDevices(context.instance, &physicalDeviceCount, nullptr);
@@ -272,6 +260,8 @@ void createLogicalDevice(VulkanContext& context) {
     const VkCommandBufferBeginInfo binfo { .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
     vkAllocateCommandBuffers(context.device, &allocateInfo, &context.work.cmdbuffer);
     vkBeginCommandBuffer(context.work.cmdbuffer, &binfo);
+
+    context.commands = new VulkanCommands(context.device, context.graphicsQueueFamilyIndex);
 }
 
 void getPresentationQueue(VulkanContext& context, VulkanSurfaceContext& sc) {
