@@ -143,6 +143,19 @@ void VulkanCommands::flush(VkSemaphore imageAvailable) {
     mCurrent = nullptr;
 }
 
+void VulkanCommands::wait() {
+    VkFence fences[CAPACITY];
+    uint32_t count = 0;
+    for (auto& wrapper : mStorage) {
+        if (wrapper.cmdbuffer != VK_NULL_HANDLE) {
+            fences[count++] = wrapper.fence->fence;
+        }
+    }
+    if (count > 0) {
+        vkWaitForFences(mDevice, count, fences, VK_TRUE, UINT64_MAX);
+    }
+}
+
 VkSemaphore VulkanCommands::latestSemaphore() {
     return mLatestSubmission ? mLatestSubmission->renderingFinished : VK_NULL_HANDLE;
 }
@@ -167,19 +180,6 @@ void VulkanCommands::gc() {
                 wrapper.fence.reset();
             }
         }
-    }
-}
-
-void VulkanCommands::wait() {
-    VkFence fences[CAPACITY];
-    uint32_t count = 0;
-    for (auto& wrapper : mStorage) {
-        if (wrapper.cmdbuffer != VK_NULL_HANDLE) {
-            fences[count++] = wrapper.fence->fence;
-        }
-    }
-    if (count > 0) {
-        vkWaitForFences(mDevice, count, fences, VK_TRUE, UINT64_MAX);
     }
 }
 

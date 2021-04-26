@@ -470,8 +470,7 @@ void destroySwapChain(VulkanContext& context, VulkanSurfaceContext& surfaceConte
 //
 // Note however that we *do* use a render pass to transition the swap chain back to
 // VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL on the subsequent frame that writes to it.
-void makeSwapChainPresentable(VulkanContext& context) {
-    VulkanSurfaceContext& surface = *context.currentSurface;
+void makeSwapChainPresentable(VulkanContext& context, VulkanSurfaceContext& surface) {
     if (surface.headlessQueue) {
         return;
     }

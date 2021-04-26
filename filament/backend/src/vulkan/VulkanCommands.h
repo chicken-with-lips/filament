@@ -63,7 +63,7 @@ class VulkanCommands {
         // If a semaphore is provided, then the GPU will wait on its signal.
         void flush(VkSemaphore imageAvailable = VK_NULL_HANDLE);
 
-        // Returns the completion semaphore associated with the most recent submission.
+        // Returns the "rendering finished" semaphore associated with the most recent submission.
         // NOTE: This is not the semaphore that was passed in to submit.
         VkSemaphore latestSemaphore();
 
