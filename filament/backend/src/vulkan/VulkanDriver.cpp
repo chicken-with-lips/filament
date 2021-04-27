@@ -1136,6 +1136,11 @@ void VulkanDriver::makeCurrent(Handle<HwSwapChain> drawSch, Handle<HwSwapChain> 
     VulkanSurfaceContext& surf = handle_cast<VulkanSwapChain>(mHandleMap, drawSch)->surfaceContext;
     mContext.currentSurface = &surf;
 
+    // Leave early if the swap chain image has already been acquired but not yet presented.
+    if (surf.acquired) {
+        return;
+    }
+
     // With MoltenVK, it might take several attempts to acquire a swap chain that is not marked as
     // "out of date" after a resize event.
     int attempts = 0;
@@ -1182,6 +1187,10 @@ void VulkanDriver::commit(Handle<HwSwapChain> sch) {
     if (surface.headlessQueue) {
         return;
     }
+
+    surface.acquired = false;
+
+    puts("   PRESENT !!!");
 
     // Present the backbuffer.
     VkSemaphore renderingFinished = mContext.commands->latestSemaphore();

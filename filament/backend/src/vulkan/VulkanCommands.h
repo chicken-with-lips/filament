@@ -82,7 +82,7 @@ class VulkanCommands {
         void addReference(void* resource);
 
     private:
-        static constexpr int CAPACITY = 8;
+        static constexpr int CAPACITY = 64;
         const VkDevice mDevice;
         VulkanBinder& mBinder;
         VulkanDisposer& mDisposer; // TODO: remove this, instead auto-dispose after 3 swaps.

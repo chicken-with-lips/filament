@@ -435,6 +435,7 @@ void createSwapChain(VulkanContext& context, VulkanSurfaceContext& surfaceContex
 
     createSemaphore(context.device, &surfaceContext.imageAvailable);
     surfaceContext.acquiredSemaphore = VK_NULL_HANDLE;
+    surfaceContext.acquired = false;
 
     createFinalDepthBuffer(context, surfaceContext, context.finalDepthFormat);
 }
@@ -563,7 +564,9 @@ bool acquireSwapChain(VulkanContext& context, VulkanSurfaceContext& surface) {
             return false;
         }
 
+        puts("acquired");
         surface.acquiredSemaphore = surface.imageAvailable;
+        surface.acquired = true;
 
         assert_invariant(result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR);
     }

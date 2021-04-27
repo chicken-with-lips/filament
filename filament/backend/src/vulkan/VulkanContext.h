@@ -126,6 +126,9 @@ struct VulkanSurfaceContext {
     // submission is waiting).
     VkSemaphore acquiredSemaphore;
 
+    // This is true after the swap chain image has been acquired, but before it has been presented.
+    bool acquired;
+
     VulkanAttachment depth;
     bool suboptimal;
     bool firstRenderPass; // TODO: set this to "true" in commit

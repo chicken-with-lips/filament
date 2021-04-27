@@ -81,7 +81,10 @@ VulkanCommandBuffer& VulkanCommands::get() {
         .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
         .commandBufferCount = 1
     };
-    const VkCommandBufferBeginInfo binfo { .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
+    const VkCommandBufferBeginInfo binfo {
+        .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+        .flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,
+    };
     vkAllocateCommandBuffers(mDevice, &allocateInfo, &mCurrent->cmdbuffer);
 
     // Create a submission semaphore.
@@ -131,7 +134,10 @@ void VulkanCommands::flush(VkSemaphore* pSemaphore) {
     const VkPipelineStageFlags waitDestStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
     const VkSemaphore imageAvailable = pSemaphore ? *pSemaphore : VK_NULL_HANDLE;
 
+    auto& cmdfence = mCurrent->fence;
+
     if (imageAvailable) {
+        printf("flushing with semaphore fence = %p\n", cmdfence->fence);
         submitInfo.waitSemaphoreCount = 1u;
         submitInfo.pWaitSemaphores = &imageAvailable;
         submitInfo.pWaitDstStageMask = &waitDestStageMask;
@@ -139,9 +145,10 @@ void VulkanCommands::flush(VkSemaphore* pSemaphore) {
         // This gets set to null to prevent a subsequent submission from waiting on the image.
         // It is illegal in Vulkan for a single semaphore to waiting on by multiple submissions.
         *pSemaphore = VK_NULL_HANDLE;
+    } else {
+        printf("flushing without semaphore fence = %p\n", cmdfence->fence);
     }
 
-    auto& cmdfence = mCurrent->fence;
     std::unique_lock<utils::Mutex> lock(cmdfence->mutex);
     cmdfence->status.store(VK_NOT_READY);
     vkQueueSubmit(mQueue, 1, &submitInfo, cmdfence->fence);
@@ -170,6 +177,10 @@ VkSemaphore VulkanCommands::latestSemaphore() {
 }
 
 void VulkanCommands::gc() {
+
+    int count = 0;
+    for (auto& wrapper : mStorage)  if (wrapper.cmdbuffer != VK_NULL_HANDLE) ++count;
+
     for (auto& wrapper : mStorage) {
         if (wrapper.cmdbuffer != VK_NULL_HANDLE) {
             VkResult result = vkWaitForFences(mDevice, 1, &wrapper.fence->fence, VK_TRUE, 0);
@@ -186,10 +197,18 @@ void VulkanCommands::gc() {
                 vkFreeCommandBuffers(mDevice, mPool, 1, &wrapper.cmdbuffer);
                 wrapper.cmdbuffer = VK_NULL_HANDLE;
 
+                printf("        releasing fence %p\n", wrapper.fence->fence);
+
                 wrapper.fence.reset();
             }
         }
     }
+
+    int after = 0;
+    for (auto& wrapper : mStorage)  if (wrapper.cmdbuffer != VK_NULL_HANDLE) ++after;
+
+    printf("gc %d => %d\n", count, after);
+
 }
 
 void VulkanCommands::updateFences() {
