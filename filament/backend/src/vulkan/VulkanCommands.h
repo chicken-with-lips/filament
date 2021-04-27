@@ -60,8 +60,9 @@ class VulkanCommands {
         VulkanCommandBuffer& get();
 
         // Submits the current command buffer if it exists, then sets "current" to null.
-        // If a semaphore is provided, then the GPU will wait on its signal.
-        void flush(VkSemaphore imageAvailable = VK_NULL_HANDLE);
+        // If a semaphore pointer is provided, then the GPU will wait on its signal and its value
+        // will be set to VK_NULL_HANDLE.
+        void flush(VkSemaphore* pSemaphore = nullptr);
 
         // Returns the "rendering finished" semaphore associated with the most recent submission.
         // NOTE: This is not the semaphore that was passed in to submit.

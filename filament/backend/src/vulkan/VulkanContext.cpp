@@ -434,6 +434,7 @@ void createSwapChain(VulkanContext& context, VulkanSurfaceContext& surfaceContex
     }
 
     createSemaphore(context.device, &surfaceContext.imageAvailable);
+    surfaceContext.acquiredSemaphore = VK_NULL_HANDLE;
 
     createFinalDepthBuffer(context, surfaceContext, context.finalDepthFormat);
 }
@@ -538,9 +539,8 @@ void waitForIdle(VulkanContext& context) {
     context.commands->wait();
 }
 
-bool acquireSwapChain(VulkanContext& context) {
+bool acquireSwapChain(VulkanContext& context, VulkanSurfaceContext& surface) {
     // Ask Vulkan for the next image in the swap chain and update the currentSwapIndex.
-    VulkanSurfaceContext& surface = *context.currentSurface;
 
     if (surface.headlessQueue) {
 
@@ -562,6 +562,8 @@ bool acquireSwapChain(VulkanContext& context) {
         if (result == VK_ERROR_OUT_OF_DATE_KHR) {
             return false;
         }
+
+        surface.acquiredSemaphore = surface.imageAvailable;
 
         assert_invariant(result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR);
     }

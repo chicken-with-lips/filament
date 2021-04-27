@@ -115,7 +115,17 @@ struct VulkanSurfaceContext {
     VkQueue headlessQueue;
     std::vector<VulkanAttachment> attachments;
     uint32_t currentSwapIndex;
+
+    // This is signaled when vkAcquireNextImageKHR succeeds, and is waited on by the first
+    // submission.
     VkSemaphore imageAvailable;
+
+    // At any given time, the following handle is either a copy of imageAvailable (in which case the
+    // swap chain has been acquired but there are no queue submissions waiting on it) or
+    // VK_NULL_HANDLE (in which case the swap chain has not yet been acquired, or an existing queue
+    // submission is waiting).
+    VkSemaphore acquiredSemaphore;
+
     VulkanAttachment depth;
     bool suboptimal;
     bool firstRenderPass; // TODO: set this to "true" in commit
@@ -133,7 +143,7 @@ void makeSwapChainPresentable(VulkanContext& context, VulkanSurfaceContext& surf
 uint32_t selectMemoryType(VulkanContext& context, uint32_t flags, VkFlags reqs);
 VulkanAttachment& getSwapChainAttachment(VulkanContext& context);
 void waitForIdle(VulkanContext& context);
-bool acquireSwapChain(VulkanContext& context);
+bool acquireSwapChain(VulkanContext& context, VulkanSurfaceContext& surface);
 VkFormat findSupportedFormat(VulkanContext& context, const std::vector<VkFormat>& candidates,
         VkImageTiling tiling, VkFormatFeatureFlags features);
 void createFinalDepthBuffer(VulkanContext& context, VulkanSurfaceContext& sc, VkFormat depthFormat);

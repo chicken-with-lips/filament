@@ -109,7 +109,7 @@ VulkanCommandBuffer& VulkanCommands::get() {
     return *mCurrent;
 }
 
-void VulkanCommands::flush(VkSemaphore imageAvailable) {
+void VulkanCommands::flush(VkSemaphore* pSemaphore) {
     // It's perfectly fine to call flush when no commands have been written.
     if (mCurrent == nullptr) {
         return;
@@ -125,11 +125,20 @@ void VulkanCommands::flush(VkSemaphore imageAvailable) {
         .pSignalSemaphores = &mCurrent->renderingFinished,
     };
 
-    VkPipelineStageFlags waitDestStageMask = VK_PIPELINE_STAGE_TRANSFER_BIT;
+    // If we are given an image availability semaphore that has not yet been signaled, it's fine to
+    // start executing commands anyway as along as we stall the GPU at the color output stage until
+    // the image becomes available.
+    const VkPipelineStageFlags waitDestStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    const VkSemaphore imageAvailable = pSemaphore ? *pSemaphore : VK_NULL_HANDLE;
+
     if (imageAvailable) {
         submitInfo.waitSemaphoreCount = 1u;
         submitInfo.pWaitSemaphores = &imageAvailable;
         submitInfo.pWaitDstStageMask = &waitDestStageMask;
+
+        // This gets set to null to prevent a subsequent submission from waiting on the image.
+        // It is illegal in Vulkan for a single semaphore to waiting on by multiple submissions.
+        *pSemaphore = VK_NULL_HANDLE;
     }
 
     auto& cmdfence = mCurrent->fence;

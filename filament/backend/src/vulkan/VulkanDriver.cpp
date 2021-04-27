@@ -323,21 +323,17 @@ void VulkanDriver::setPresentationTime(int64_t monotonic_clock_ns) {
 
 void VulkanDriver::endFrame(uint32_t frameId) {
     VulkanSurfaceContext* surface = mContext.currentSurface;
-    mContext.commands->flush((surface && !surface->headlessQueue) ?
-            surface->imageAvailable : VK_NULL_HANDLE);
+    mContext.commands->flush(surface ? &surface->acquiredSemaphore : VK_NULL_HANDLE);
 }
 
 void VulkanDriver::flush(int) {
     VulkanSurfaceContext* surface = mContext.currentSurface;
-    mContext.commands->flush((surface && !surface->headlessQueue) ?
-            surface->imageAvailable : VK_NULL_HANDLE);
+    mContext.commands->flush(surface ? &surface->acquiredSemaphore : VK_NULL_HANDLE);
 }
 
 void VulkanDriver::finish(int dummy) {
     VulkanSurfaceContext* surface = mContext.currentSurface;
-    mContext.commands->flush((surface && !surface->headlessQueue) ?
-            surface->imageAvailable : VK_NULL_HANDLE);
-    mContext.commands->wait();
+    mContext.commands->flush(surface ? &surface->acquiredSemaphore : VK_NULL_HANDLE);
 }
 
 void VulkanDriver::createSamplerGroupR(Handle<HwSamplerGroup> sbh, size_t count) {
@@ -1137,13 +1133,13 @@ void VulkanDriver::setRenderPrimitiveRange(Handle<HwRenderPrimitive> rph,
 void VulkanDriver::makeCurrent(Handle<HwSwapChain> drawSch, Handle<HwSwapChain> readSch) {
     ASSERT_PRECONDITION_NON_FATAL(drawSch == readSch,
                                   "Vulkan driver does not support distinct draw/read swap chains.");
-    VulkanSurfaceContext& sContext = handle_cast<VulkanSwapChain>(mHandleMap, drawSch)->surfaceContext;
-    mContext.currentSurface = &sContext;
+    VulkanSurfaceContext& surf = handle_cast<VulkanSwapChain>(mHandleMap, drawSch)->surfaceContext;
+    mContext.currentSurface = &surf;
 
     // With MoltenVK, it might take several attempts to acquire a swap chain that is not marked as
     // "out of date" after a resize event.
     int attempts = 0;
-    while (!acquireSwapChain(mContext)) {
+    while (!acquireSwapChain(mContext, surf)) {
         refreshSwapChain();
         if (attempts++ > SWAP_CHAIN_MAX_ATTEMPTS) {
             PANIC_POSTCONDITION("Unable to acquire image from swap chain.");
@@ -1179,7 +1175,7 @@ void VulkanDriver::commit(Handle<HwSwapChain> sch) {
     // be done as part of the render pass because it does not know if it is last pass in the frame.
     makeSwapChainPresentable(mContext, surface);
 
-    mContext.commands->flush(surface.headlessQueue ? VK_NULL_HANDLE : surface.imageAvailable);
+    mContext.commands->flush(&surface.acquiredSemaphore);
 
     surface.firstRenderPass = true;
 
@@ -1412,7 +1408,7 @@ void VulkanDriver::readPixels(Handle<HwRenderTarget> src, uint32_t x, uint32_t y
 
     auto surface = mContext.currentSurface;
     mContext.commands->wait();
-    mContext.commands->flush(surface->headlessQueue ? VK_NULL_HANDLE : surface->imageAvailable);
+    mContext.commands->flush(surface ? &surface->acquiredSemaphore : VK_NULL_HANDLE);
 
     VkImageSubresource subResource { .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT };
     VkSubresourceLayout subResourceLayout;
