@@ -13,6 +13,8 @@ project(TNT)
 # ==================================================================================================
 option(FILAMENT_ENABLE_JAVA "Compile Java projects, requires a JDK and the JAVA_HOME env var" ON)
 
+option(FILAMENT_ENABLE_DOTNET "Compile .net projects" ON)
+
 option(FILAMENT_USE_EXTERNAL_GLES3 "Experimental: Compile Filament against OpenGL ES 3" OFF)
 
 option(FILAMENT_USE_SWIFTSHADER "Compile Filament against SwiftShader" OFF)
@@ -657,6 +659,10 @@ if (IS_HOST_PLATFORM)
     add_subdirectory(${TOOLS}/resgen)
     add_subdirectory(${TOOLS}/roughness-prefilter)
     add_subdirectory(${TOOLS}/specular-color)
+
+    if (FILAMENT_ENABLE_DOTNET)
+        add_subdirectory(${FILAMENT}/dotnet/filament)
+    endif()
 endif()
 
 # Generate exported executables for cross-compiled builds (Android, WebGL, and iOS)
