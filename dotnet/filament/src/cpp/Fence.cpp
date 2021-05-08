@@ -2,7 +2,7 @@
 
 using namespace filament;
 
-extern "C" int filament_Fence_nWait(void *nativeFence, int mode, uint timeoutNanoSeconds) {
+extern "C" int filament_Fence_nWait(void *nativeFence, int mode, uint64_t timeoutNanoSeconds) {
     Fence *fence = (Fence *) nativeFence;
     return (int) fence->wait((Fence::Mode) mode, (uint64_t) timeoutNanoSeconds);
 }
