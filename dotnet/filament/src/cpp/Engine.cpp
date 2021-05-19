@@ -216,3 +216,8 @@ extern "C" void *filament_Engine_nGetJobSystem(void *nativeEngine) {
     Engine *engine = (Engine *) nativeEngine;
     return (void *) &engine->getJobSystem();
 }
+
+extern "C" void *filament_Engine_nGetDefaultMaterial(void *nativeEngine) {
+    Engine *engine = (Engine *) nativeEngine;
+    return (void *) engine->getDefaultMaterial();
+}
