@@ -21,9 +21,9 @@ extern "C" void filament_View_nSetCamera(void *nativeView, void *nativeCamera) {
     view->setCamera(camera);
 }
 
-extern "C" void* filament_View_nGetCamera(void *nativeView) {
+extern "C" void *filament_View_nGetCamera(void *nativeView) {
     View *view = (View *) nativeView;
-    return (void*) &view->getCamera();
+    return (void *) &view->getCamera();
 }
 
 extern "C" void filament_View_nSetDebugCamera(void *nativeView, void *nativeCamera) {
@@ -202,7 +202,9 @@ extern "C" void filament_View_nSetAmbientOcclusionOptions(
 extern "C" void filament_View_nSetBloomOptions(
         void *nativeView, void *nativeTexture,
         float dirtStrength, float strength, int resolution, float anamorphism, int levels,
-        int blendMode, bool threshold, bool enabled, float highlight) {
+        int blendMode, bool threshold, bool enabled, float highlight, bool lensFlare, bool starburst,
+        float chromaticAberration, int ghostCount, float ghostSpacing, float ghostThreshold, float haloThickness,
+        float haloRadius, float haloThreshold) {
     View *view = (View *) nativeView;
     Texture *dirt = (Texture *) nativeTexture;
     View::BloomOptions options = {
@@ -215,7 +217,16 @@ extern "C" void filament_View_nSetBloomOptions(
             .blendMode = (View::BloomOptions::BlendMode) blendMode,
             .threshold = (bool) threshold,
             .enabled = (bool) enabled,
-            .highlight = highlight
+            .highlight = highlight,
+            .lensFlare = (bool)lensFlare,
+            .starburst = (bool)starburst,
+            .chromaticAberration = chromaticAberration,
+            .ghostCount = (uint8_t)ghostCount,
+            .ghostSpacing = ghostSpacing,
+            .ghostThreshold = ghostThreshold,
+            .haloThickness = haloThickness,
+            .haloRadius = haloRadius,
+            .haloThreshold = haloThreshold
     };
     view->setBloomOptions(options);
 }
@@ -247,10 +258,25 @@ extern "C" void filament_View_nSetBlendMode(void *nativeView, int blendMode) {
 }
 
 extern "C" void filament_View_nSetDepthOfFieldOptions(void *nativeView, float focusDistance, float cocScale,
-                                                      float maxApertureDiameter, bool enabled) {
+                                                      float maxApertureDiameter, bool enabled, int filter,
+                                                      bool nativeResolution, int foregroundRingCount,
+                                                      int backgroundRingCount, int fastGatherRingCount,
+                                                      int maxForegroundCOC, int maxBackgroundCOC) {
     View *view = (View *) nativeView;
+    View::DepthOfFieldOptions::Filter eFilter{};
+    if (filter == 1) {
+        // View::DepthOfFieldOptions::Filter::MEDIAN value is actually 2
+        eFilter = View::DepthOfFieldOptions::Filter::MEDIAN;
+    }
     view->setDepthOfFieldOptions({.focusDistance = focusDistance, .cocScale = cocScale,
-                                         .maxApertureDiameter = maxApertureDiameter, .enabled = (bool) enabled});
+        .maxApertureDiameter = maxApertureDiameter, .enabled = (bool)enabled, .filter = eFilter,
+        .nativeResolution = (bool)nativeResolution,
+        .foregroundRingCount = (uint8_t)foregroundRingCount,
+        .backgroundRingCount = (uint8_t)backgroundRingCount,
+        .fastGatherRingCount = (uint8_t)fastGatherRingCount,
+        .maxForegroundCOC = (uint8_t)maxForegroundCOC,
+        .maxBackgroundCOC = (uint8_t)maxBackgroundCOC,
+    });
 }
 
 extern "C" void filament_View_nSetVignetteOptions(void *nativeView, float midPoint, float roundness,

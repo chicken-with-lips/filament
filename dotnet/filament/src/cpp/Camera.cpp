@@ -35,7 +35,7 @@ extern "C" void filament_Camera_nSetLensProjection(void *nativeCamera, float foc
 //}
 //
 
-extern "C" void filament_Camera_nSetCustomProjection(void *nativeCamera, float *m, float near, float far) {
+extern "C" void filament_Camera_nSetCustomProjection(void *nativeCamera, float *m, float *c, float near, float far) {
     Camera *camera = (Camera *) nativeCamera;
     camera->setCustomProjection(
             filament::math::mat4(
@@ -43,7 +43,14 @@ extern "C" void filament_Camera_nSetCustomProjection(void *nativeCamera, float *
                     m[4], m[5], m[6], m[7],
                     m[8], m[9], m[10], m[11],
                     m[12], m[13], m[14], m[15]
-            ), near, far
+            ),
+            filament::math::mat4(
+                    c[0], c[1], c[2], c[3],
+                    c[4], c[5], c[6], c[7],
+                    c[8], c[9], c[10], c[11],
+                    c[12], c[13], c[14], c[15]
+            ),
+            near, far
     );
 }
 
@@ -88,15 +95,11 @@ extern "C" void filament_Camera_nGetProjectionMatrix(void *nativeCamera, filamen
     *outMatrix = filament::math::mat4f(camera->getProjectionMatrix());
 }
 
-//extern "C" JNIEXPORT void JNICALL
-//Java_com_google_android_filament_Camera_nGetCullingProjectionMatrix(JNIEnv *env, jclass,
-//jlong nativeCamera, jdoubleArray out_) {
-//Camera *camera = (Camera *) nativeCamera;
-//jdouble *out = env->GetDoubleArrayElements(out_, NULL);
-//const filament::math::mat4& m = camera->getCullingProjectionMatrix();
-//std::copy_n(&m[0][0], 16, out);
-//env->ReleaseDoubleArrayElements(out_, out, 0);
-//}
+extern "C" void filament_Camera_nGetCullingProjectionMatrix(void *nativeCamera, filament::math::mat4f *outMatrix) {
+    Camera *camera = (Camera *) nativeCamera;
+    *outMatrix = filament::math::mat4f(camera->getCullingProjectionMatrix());
+}
+
 //
 //extern "C" JNIEXPORT void JNICALL
 //Java_com_google_android_filament_Camera_nGetScaling(JNIEnv *env, jclass,
