@@ -1,3 +1,4 @@
+#include "Export.h"
 #include <filament/MaterialInstance.h>
 #include <filament/Texture.h>
 #include <filament/TextureSampler.h>
@@ -40,66 +41,66 @@ static void setParameter(void *nativeMaterialInstance, const char *name, T v) {
     instance->setParameter(name, v);
 }
 
-extern "C" void filament_MaterialInstance_nSetParameterBool(void *nativeMaterialInstance, const char *name_, bool x) {
+extern "C" DOTNET_EXPORT void filament_MaterialInstance_nSetParameterBool(void *nativeMaterialInstance, const char *name_, bool x) {
     setParameter(nativeMaterialInstance, name_, bool(x));
 }
 
-extern "C" void
+extern "C" DOTNET_EXPORT void
 filament_MaterialInstance_nSetParameterBool2(void *nativeMaterialInstance, const char *name_, bool x, bool y) {
     setParameter(nativeMaterialInstance, name_, bool2{x, y});
 }
 
-extern "C" void
+extern "C" DOTNET_EXPORT void
 filament_MaterialInstance_nSetParameterBool3(void *nativeMaterialInstance, const char *name_, bool x, bool y,
                                              bool z) {
     setParameter(nativeMaterialInstance, name_, bool3{x, y, z});
 }
 
-extern "C" void filament_MaterialInstance_nSetParameterBool4(void *nativeMaterialInstance, const char *name_,
+extern "C" DOTNET_EXPORT void filament_MaterialInstance_nSetParameterBool4(void *nativeMaterialInstance, const char *name_,
                                                              bool x, bool y, bool z, bool w) {
     setParameter(nativeMaterialInstance, name_, bool4{x, y, z, w});
 }
 
-extern "C" void filament_MaterialInstance_nSetParameterInt(void *nativeMaterialInstance, const char *name_, int x) {
+extern "C" DOTNET_EXPORT void filament_MaterialInstance_nSetParameterInt(void *nativeMaterialInstance, const char *name_, int x) {
     setParameter(nativeMaterialInstance, name_, int32_t(x));
 }
 
-extern "C" void
+extern "C" DOTNET_EXPORT void
 filament_MaterialInstance_nSetParameterInt2(void *nativeMaterialInstance, const char *name_, int x, int y) {
     setParameter(nativeMaterialInstance, name_, int2{x, y});
 }
 
-extern "C" void
+extern "C" DOTNET_EXPORT void
 filament_MaterialInstance_nSetParameterInt3(void *nativeMaterialInstance, const char *name_, int x, int y, int z) {
     setParameter(nativeMaterialInstance, name_, int3{x, y, z});
 }
 
-extern "C" void filament_MaterialInstance_nSetParameterInt4(void *nativeMaterialInstance, const char *name_,
+extern "C" DOTNET_EXPORT void filament_MaterialInstance_nSetParameterInt4(void *nativeMaterialInstance, const char *name_,
                                                             int x, int y, int z, int w) {
     setParameter(nativeMaterialInstance, name_, int4{x, y, z, w});
 }
 
-extern "C" void filament_MaterialInstance_nSetParameterFloat(void *nativeMaterialInstance, const char *name_, float x) {
+extern "C" DOTNET_EXPORT void filament_MaterialInstance_nSetParameterFloat(void *nativeMaterialInstance, const char *name_, float x) {
     setParameter(nativeMaterialInstance, name_, float(x));
 }
 
-extern "C" void
+extern "C" DOTNET_EXPORT void
 filament_MaterialInstance_nSetParameterFloat2(void *nativeMaterialInstance, const char *name_, float x, float y) {
     setParameter(nativeMaterialInstance, name_, float2{x, y});
 }
 
-extern "C" void
+extern "C" DOTNET_EXPORT void
 filament_MaterialInstance_nSetParameterFloat3(void *nativeMaterialInstance, const char *name_, float x, float y,
                                               float z) {
     setParameter(nativeMaterialInstance, name_, float3{x, y, z});
 }
 
-extern "C" void filament_MaterialInstance_nSetParameterFloat4(void *nativeMaterialInstance, const char *name_,
+extern "C" DOTNET_EXPORT void filament_MaterialInstance_nSetParameterFloat4(void *nativeMaterialInstance, const char *name_,
                                                               float x, float y, float z, float w) {
     setParameter(nativeMaterialInstance, name_, float4{x, y, z, w});
 }
 
-extern "C" void filament_MaterialInstance_nSetParameterTexture(void *nativeMaterialInstance, void *nativeTexture,
+extern "C" DOTNET_EXPORT void filament_MaterialInstance_nSetParameterTexture(void *nativeMaterialInstance, void *nativeTexture,
                                                                const char *name_, void *sampler_) {
     MaterialInstance *instance = (MaterialInstance *) nativeMaterialInstance;
     Texture *texture = (Texture *) nativeTexture;
@@ -108,21 +109,21 @@ extern "C" void filament_MaterialInstance_nSetParameterTexture(void *nativeMater
     instance->setParameter(name_, texture, sampler);
 }
 
-extern "C" void filament_MaterialInstance_nSetParameterRgbColor(void *nativeMaterialInstance,
+extern "C" DOTNET_EXPORT void filament_MaterialInstance_nSetParameterRgbColor(void *nativeMaterialInstance,
                                                                 const char *name_, int type, float r, float g, float b) {
     MaterialInstance *instance = (MaterialInstance *) nativeMaterialInstance;
 
     instance->setParameter(name_, (RgbType) type, {r, g, b});
 }
 
-extern "C" void filament_MaterialInstance_nSetParameterRgbaColor(void *nativeMaterialInstance,
+extern "C" DOTNET_EXPORT void filament_MaterialInstance_nSetParameterRgbaColor(void *nativeMaterialInstance,
                                                                 const char *name_, int type, float r, float g, float b, float a) {
     MaterialInstance *instance = (MaterialInstance *) nativeMaterialInstance;
 
     instance->setParameter(name_, (RgbaType) type, {r, g, b, a});
 }
 
-//extern "C" void
+//extern "C" DOTNET_EXPORT void
 //filament_MaterialInstance_nSetBooleanParameterArray(void *nativeMaterialInstance, jstring name_, int element,
 //                                                    boolArray v_, int offset, int count) {
 //    MaterialInstance *instance = (MaterialInstance *) nativeMaterialInstance;
@@ -153,7 +154,7 @@ extern "C" void filament_MaterialInstance_nSetParameterRgbaColor(void *nativeMat
 //    env->ReleaseStringUTFChars(name_, name);
 //}
 //
-//extern "C" void
+//extern "C" DOTNET_EXPORT void
 //filament_MaterialInstance_nSetIntParameterArray(void *nativeMaterialInstance, jstring name_, int element,
 //                                                intArray v_, int offset, int count) {
 //    MaterialInstance *instance = (MaterialInstance *) nativeMaterialInstance;
@@ -181,7 +182,7 @@ extern "C" void filament_MaterialInstance_nSetParameterRgbaColor(void *nativeMat
 //    env->ReleaseStringUTFChars(name_, name);
 //}
 //
-//extern "C" void
+//extern "C" DOTNET_EXPORT void
 //filament_MaterialInstance_nSetFloatParameterArray(void *nativeMaterialInstance, jstring name_, int element,
 //                                                  floatArray v_, int offset, int count) {
 //    MaterialInstance *instance = (MaterialInstance *) nativeMaterialInstance;
@@ -215,7 +216,7 @@ extern "C" void filament_MaterialInstance_nSetParameterRgbaColor(void *nativeMat
 //    env->ReleaseStringUTFChars(name_, name);
 //}
 //
-//extern "C" void filament_MaterialInstance_nSetParameterTexture(
+//extern "C" DOTNET_EXPORT void filament_MaterialInstance_nSetParameterTexture(
 //        void *nativeMaterialInstance, jstring name_,
 //        void *nativeTexture, int sampler_) {
 //    MaterialInstance *instance = (MaterialInstance *) nativeMaterialInstance;
@@ -227,70 +228,70 @@ extern "C" void filament_MaterialInstance_nSetParameterRgbaColor(void *nativeMat
 //    env->ReleaseStringUTFChars(name_, name);
 //}
 
-extern "C" void
+extern "C" DOTNET_EXPORT void
 filament_MaterialInstance_nSetScissor(void *nativeMaterialInstance, int left, int bottom, int width, int height) {
     MaterialInstance *instance = (MaterialInstance *) nativeMaterialInstance;
     instance->setScissor(left, bottom, width, height);
 }
 
-extern "C" void filament_MaterialInstance_nUnsetScissor(void *nativeMaterialInstance) {
+extern "C" DOTNET_EXPORT void filament_MaterialInstance_nUnsetScissor(void *nativeMaterialInstance) {
     MaterialInstance *instance = (MaterialInstance *) nativeMaterialInstance;
     instance->unsetScissor();
 }
 
-extern "C" void filament_MaterialInstance_nSetPolygonOffset(void *nativeMaterialInstance, float scale, float constant) {
+extern "C" DOTNET_EXPORT void filament_MaterialInstance_nSetPolygonOffset(void *nativeMaterialInstance, float scale, float constant) {
     MaterialInstance *instance = (MaterialInstance *) nativeMaterialInstance;
     instance->setPolygonOffset(scale, constant);
 }
 
-extern "C" void filament_MaterialInstance_nSetMaskThreshold(void *nativeMaterialInstance, float threshold) {
+extern "C" DOTNET_EXPORT void filament_MaterialInstance_nSetMaskThreshold(void *nativeMaterialInstance, float threshold) {
     MaterialInstance *instance = (MaterialInstance *) nativeMaterialInstance;
     instance->setMaskThreshold(threshold);
 }
 
-extern "C" void
+extern "C" DOTNET_EXPORT void
 filament_MaterialInstance_nSetSpecularAntiAliasingVariance(void *nativeMaterialInstance, float variance) {
     MaterialInstance *instance = (MaterialInstance *) nativeMaterialInstance;
     instance->setSpecularAntiAliasingVariance(variance);
 }
 
-extern "C" void
+extern "C" DOTNET_EXPORT void
 filament_MaterialInstance_nSetSpecularAntiAliasingThreshold(void *nativeMaterialInstance, float threshold) {
     MaterialInstance *instance = (MaterialInstance *) nativeMaterialInstance;
     instance->setSpecularAntiAliasingThreshold(threshold);
 }
 
-extern "C" void filament_MaterialInstance_nSetDoubleSided(void *nativeMaterialInstance, bool doubleSided) {
+extern "C" DOTNET_EXPORT void filament_MaterialInstance_nSetDoubleSided(void *nativeMaterialInstance, bool doubleSided) {
     MaterialInstance *instance = (MaterialInstance *) nativeMaterialInstance;
     instance->setDoubleSided(doubleSided);
 }
 
-extern "C" void filament_MaterialInstance_nSetCullingMode(void *nativeMaterialInstance, int cullingMode) {
+extern "C" DOTNET_EXPORT void filament_MaterialInstance_nSetCullingMode(void *nativeMaterialInstance, int cullingMode) {
     MaterialInstance *instance = (MaterialInstance *) nativeMaterialInstance;
     instance->setCullingMode((MaterialInstance::CullingMode) cullingMode);
 }
 
-extern "C" void filament_MaterialInstance_nSetColorWrite(void *nativeMaterialInstance, bool enable) {
+extern "C" DOTNET_EXPORT void filament_MaterialInstance_nSetColorWrite(void *nativeMaterialInstance, bool enable) {
     MaterialInstance *instance = (MaterialInstance *) nativeMaterialInstance;
     instance->setColorWrite(enable);
 }
 
-extern "C" void filament_MaterialInstance_nSetDepthWrite(void *nativeMaterialInstance, bool enable) {
+extern "C" DOTNET_EXPORT void filament_MaterialInstance_nSetDepthWrite(void *nativeMaterialInstance, bool enable) {
     MaterialInstance *instance = (MaterialInstance *) nativeMaterialInstance;
     instance->setDepthWrite(enable);
 }
 
-extern "C" void filament_MaterialInstance_nSetDepthCulling(void *nativeMaterialInstance, bool enable) {
+extern "C" DOTNET_EXPORT void filament_MaterialInstance_nSetDepthCulling(void *nativeMaterialInstance, bool enable) {
     MaterialInstance *instance = (MaterialInstance *) nativeMaterialInstance;
     instance->setDepthCulling(enable);
 }
 
-extern "C" const char* filament_MaterialInstance_nGetName(void *nativeMaterialInstance) {
+extern "C" DOTNET_EXPORT const char* filament_MaterialInstance_nGetName(void *nativeMaterialInstance) {
     MaterialInstance *instance = (MaterialInstance *) nativeMaterialInstance;
     return instance->getName();
 }
 
-extern "C" void *filament_MaterialInstance_nGetMaterial(void *nativeMaterialInstance) {
+extern "C" DOTNET_EXPORT void *filament_MaterialInstance_nGetMaterial(void *nativeMaterialInstance) {
     MaterialInstance *instance = (MaterialInstance *) nativeMaterialInstance;
     return (void *) instance->getMaterial();
 }

@@ -1,3 +1,4 @@
+#include "Export.h"
 #include <functional>
 #include <stdlib.h>
 #include <string.h>
@@ -10,39 +11,39 @@
 using namespace filament;
 using namespace backend;
 
-extern "C" void *filament_IndexBuffer_nCreateBuilder() {
+extern "C" DOTNET_EXPORT void *filament_IndexBuffer_nCreateBuilder() {
     return (void *) new IndexBuffer::Builder();
 }
 
-extern "C" void filament_IndexBuffer_nDestroyBuilder(void *nativeBuilder) {
+extern "C" DOTNET_EXPORT void filament_IndexBuffer_nDestroyBuilder(void *nativeBuilder) {
     IndexBuffer::Builder *builder = (IndexBuffer::Builder *) nativeBuilder;
     delete builder;
 }
 
-extern "C" void filament_IndexBuffer_nBuilderIndexCount(void *nativeBuilder, int indexCount) {
+extern "C" DOTNET_EXPORT void filament_IndexBuffer_nBuilderIndexCount(void *nativeBuilder, int indexCount) {
     IndexBuffer::Builder *builder = (IndexBuffer::Builder *) nativeBuilder;
     builder->indexCount((uint32_t) indexCount);
 }
 
-extern "C" void filament_IndexBuffer_nBuilderBufferType(void *nativeBuilder, int indexType) {
+extern "C" DOTNET_EXPORT void filament_IndexBuffer_nBuilderBufferType(void *nativeBuilder, int indexType) {
     using IndexType = IndexBuffer::IndexType;
     IndexBuffer::Builder *builder = (IndexBuffer::Builder *) nativeBuilder;
     IndexType types[] = {IndexType::USHORT, IndexType::UINT};
     builder->bufferType(types[indexType & 1]);
 }
 
-extern "C" void *filament_IndexBuffer_nBuilderBuild(void *nativeBuilder, void *nativeEngine) {
+extern "C" DOTNET_EXPORT void *filament_IndexBuffer_nBuilderBuild(void *nativeBuilder, void *nativeEngine) {
     IndexBuffer::Builder *builder = (IndexBuffer::Builder *) nativeBuilder;
     Engine *engine = (Engine *) nativeEngine;
     return (void *) builder->build(*engine);
 }
 
-extern "C" int filament_IndexBuffer_nGetIndexCount(void *nativeIndexBuffer) {
+extern "C" DOTNET_EXPORT int filament_IndexBuffer_nGetIndexCount(void *nativeIndexBuffer) {
     IndexBuffer *indexBuffer = (IndexBuffer *) nativeIndexBuffer;
     return indexBuffer->getIndexCount();
 }
 
-extern "C" void filament_IndexBuffer_nSetBuffer(void *nativeIndexBuffer, void *nativeEngine,
+extern "C" DOTNET_EXPORT void filament_IndexBuffer_nSetBuffer(void *nativeIndexBuffer, void *nativeEngine,
                                                 void *buffer, int bufferSizeInBytes,
                                                 int destOffsetInBytes) {
     IndexBuffer *indexBuffer = (IndexBuffer *) nativeIndexBuffer;

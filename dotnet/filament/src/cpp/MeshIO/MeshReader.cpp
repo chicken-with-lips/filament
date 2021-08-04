@@ -1,3 +1,4 @@
+#include "../Export.h"
 #include <filament/Engine.h>
 #include <filament/Material.h>
 
@@ -6,7 +7,7 @@
 using namespace filament;
 using namespace filamesh;
 
-extern "C" void
+extern "C" DOTNET_EXPORT void
 filament_MeshIO_MeshReader_nLoadMeshFromBufferMaterial(void *nativeEngine, void *buffer,
                                                        void *nativeDefaultMaterialInstance, int &outRenderable,
                                                        VertexBuffer **outVertexBuffer, IndexBuffer **outIndexBuffer) {

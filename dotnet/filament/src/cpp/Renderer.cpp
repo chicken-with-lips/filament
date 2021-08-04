@@ -1,3 +1,4 @@
+#include "Export.h"
 #include <filament/Engine.h>
 #include <filament/Renderer.h>
 #include <filament/Viewport.h>
@@ -6,24 +7,24 @@
 using namespace filament;
 using namespace backend;
 
-extern "C" bool filament_Renderer_nBeginFrame(void *nativeRenderer, void *nativeSwapChain, void *frameTimeNanos) {
+extern "C" DOTNET_EXPORT bool filament_Renderer_nBeginFrame(void *nativeRenderer, void *nativeSwapChain, void *frameTimeNanos) {
     Renderer *renderer = (Renderer *) nativeRenderer;
     SwapChain *swapChain = (SwapChain *) nativeSwapChain;
     return (bool) renderer->beginFrame(swapChain, uint64_t(frameTimeNanos));
 }
 
-extern "C" void filament_Renderer_nEndFrame(void *nativeRenderer) {
+extern "C" DOTNET_EXPORT void filament_Renderer_nEndFrame(void *nativeRenderer) {
     Renderer *renderer = (Renderer *) nativeRenderer;
     renderer->endFrame();
 }
 
-extern "C" void filament_Renderer_nRender(void *nativeRenderer, void *nativeView) {
+extern "C" DOTNET_EXPORT void filament_Renderer_nRender(void *nativeRenderer, void *nativeView) {
     Renderer *renderer = (Renderer *) nativeRenderer;
     View *view = (View *) nativeView;
     renderer->render(view);
 }
 
-extern "C" void filament_Renderer_nCopyFrame(void *nativeRenderer,
+extern "C" DOTNET_EXPORT void filament_Renderer_nCopyFrame(void *nativeRenderer,
                                              void *nativeDstSwapChain,
                                              int dstLeft, int dstBottom, int dstWidth, int dstHeight,
                                              int srcLeft, int srcBottom, int srcWidth, int srcHeight,
@@ -36,7 +37,7 @@ extern "C" void filament_Renderer_nCopyFrame(void *nativeRenderer,
 }
 
 // FIXME:
-//extern "C" int filament_Renderer_nReadPixels(void *nativeRenderer, void *nativeEngine,
+//extern "C" DOTNET_EXPORT int filament_Renderer_nReadPixels(void *nativeRenderer, void *nativeEngine,
 //                                             int xoffset, int yoffset, int width, int height,
 //                                             jobject storage, int remaining,
 //                                             int left, int top, int type, int alignment, int stride, int format,
@@ -68,7 +69,7 @@ extern "C" void filament_Renderer_nCopyFrame(void *nativeRenderer,
 //    return 0;
 //}
 //
-//extern "C" int filament_Renderer_nReadPixelsEx(void *nativeRenderer, void *nativeEngine, void *nativeRenderTarget,
+//extern "C" DOTNET_EXPORT int filament_Renderer_nReadPixelsEx(void *nativeRenderer, void *nativeEngine, void *nativeRenderTarget,
 //                                               int xoffset, int yoffset, int width, int height,
 //                                               jobject storage, int remaining,
 //                                               int left, int top, int type, int alignment, int stride, int format,
@@ -102,17 +103,17 @@ extern "C" void filament_Renderer_nCopyFrame(void *nativeRenderer,
 //    return 0;
 //}
 
-extern "C" float filament_Renderer_nGetUserTime(void *nativeRenderer) {
+extern "C" DOTNET_EXPORT float filament_Renderer_nGetUserTime(void *nativeRenderer) {
     Renderer *renderer = (Renderer *) nativeRenderer;
     return renderer->getUserTime();
 }
 
-extern "C" void filament_Renderer_nResetUserTime(void *nativeRenderer) {
+extern "C" DOTNET_EXPORT void filament_Renderer_nResetUserTime(void *nativeRenderer) {
     Renderer *renderer = (Renderer *) nativeRenderer;
     renderer->resetUserTime();
 }
 
-extern "C" void filament_Renderer_nSetDisplayInfo(void *nativeRenderer,
+extern "C" DOTNET_EXPORT void filament_Renderer_nSetDisplayInfo(void *nativeRenderer,
                                                   float refreshRate, void *presentationDeadlineNanos,
                                                   void *vsyncOffsetNanos) {
     Renderer *renderer = (Renderer *) nativeRenderer;
@@ -121,7 +122,7 @@ extern "C" void filament_Renderer_nSetDisplayInfo(void *nativeRenderer,
                                      .vsyncOffsetNanos = (uint64_t) vsyncOffsetNanos});
 }
 
-extern "C" void filament_Renderer_nSetFrameRateOptions(void *nativeRenderer, float interval, float headRoomRatio,
+extern "C" DOTNET_EXPORT void filament_Renderer_nSetFrameRateOptions(void *nativeRenderer, float interval, float headRoomRatio,
                                                        float scaleRate, int history) {
     Renderer *renderer = (Renderer *) nativeRenderer;
     renderer->setFrameRateOptions({.headRoomRatio = headRoomRatio,
@@ -130,7 +131,7 @@ extern "C" void filament_Renderer_nSetFrameRateOptions(void *nativeRenderer, flo
                                           .interval = (uint8_t) interval});
 }
 
-extern "C" void filament_Renderer_nSetClearOptions(void *nativeRenderer, float r, float g, float b, float a,
+extern "C" DOTNET_EXPORT void filament_Renderer_nSetClearOptions(void *nativeRenderer, float r, float g, float b, float a,
                                                    bool clear, bool discard) {
     Renderer *renderer = (Renderer *) nativeRenderer;
     renderer->setClearOptions({.clearColor = {r, g, b, a},
@@ -138,7 +139,7 @@ extern "C" void filament_Renderer_nSetClearOptions(void *nativeRenderer, float r
                                       .discard = (bool) discard});
 }
 
-extern "C" void *filament_Renderer_nGetEngine(void *nativeRenderer) {
+extern "C" DOTNET_EXPORT void *filament_Renderer_nGetEngine(void *nativeRenderer) {
     Renderer *renderer = (Renderer *) nativeRenderer;
     return renderer->getEngine();
 }

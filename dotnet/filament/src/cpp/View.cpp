@@ -1,99 +1,100 @@
+#include "Export.h"
 #include <filament/Color.h>
 #include <filament/View.h>
 #include <filament/Viewport.h>
 
 using namespace filament;
 
-extern "C" void filament_View_nSetName(void *nativeView, const char *name) {
+extern "C" DOTNET_EXPORT void filament_View_nSetName(void *nativeView, const char *name) {
     View *view = (View *) nativeView;
     view->setName(name);
 }
 
-extern "C" void filament_View_nSetScene(void *nativeView, void *nativeScene) {
+extern "C" DOTNET_EXPORT void filament_View_nSetScene(void *nativeView, void *nativeScene) {
     View *view = (View *) nativeView;
     Scene *scene = (Scene *) nativeScene;
     view->setScene(scene);
 }
 
-extern "C" void filament_View_nSetCamera(void *nativeView, void *nativeCamera) {
+extern "C" DOTNET_EXPORT void filament_View_nSetCamera(void *nativeView, void *nativeCamera) {
     View *view = (View *) nativeView;
     Camera *camera = (Camera *) nativeCamera;
     view->setCamera(camera);
 }
 
-extern "C" void *filament_View_nGetCamera(void *nativeView) {
+extern "C" DOTNET_EXPORT void *filament_View_nGetCamera(void *nativeView) {
     View *view = (View *) nativeView;
     return (void *) &view->getCamera();
 }
 
-extern "C" void filament_View_nSetDebugCamera(void *nativeView, void *nativeCamera) {
+extern "C" DOTNET_EXPORT void filament_View_nSetDebugCamera(void *nativeView, void *nativeCamera) {
     View *view = (View *) nativeView;
     Camera *camera = (Camera *) nativeCamera;
     view->setDebugCamera(camera);
 }
 
-extern "C" void filament_View_nSetColorGrading(void *nativeView, void *nativeColorGrading) {
+extern "C" DOTNET_EXPORT void filament_View_nSetColorGrading(void *nativeView, void *nativeColorGrading) {
     View *view = (View *) nativeView;
     ColorGrading *colorGrading = (ColorGrading *) nativeColorGrading;
     view->setColorGrading(colorGrading);
 }
 
-extern "C" void filament_View_nSetViewport(void *nativeView, int left, int bottom, int width, int height) {
+extern "C" DOTNET_EXPORT void filament_View_nSetViewport(void *nativeView, int left, int bottom, int width, int height) {
     View *view = (View *) nativeView;
     view->setViewport({left, bottom, (uint32_t) width, (uint32_t) height});
 }
 
-extern "C" void filament_View_nSetVisibleLayers(void *nativeView, int select, int value) {
+extern "C" DOTNET_EXPORT void filament_View_nSetVisibleLayers(void *nativeView, int select, int value) {
     View *view = (View *) nativeView;
     view->setVisibleLayers((uint8_t) select, (uint8_t) value);
 }
 
-extern "C" void filament_View_nSetShadowingEnabled(void *nativeView, bool enabled) {
+extern "C" DOTNET_EXPORT void filament_View_nSetShadowingEnabled(void *nativeView, bool enabled) {
     View *view = (View *) nativeView;
     view->setShadowingEnabled(enabled);
 }
 
-extern "C" void filament_View_nSetRenderTarget(void *nativeView, void *nativeTarget) {
+extern "C" DOTNET_EXPORT void filament_View_nSetRenderTarget(void *nativeView, void *nativeTarget) {
     View *view = (View *) nativeView;
     view->setRenderTarget((RenderTarget *) nativeTarget);
 }
 
-extern "C" void filament_View_nSetSampleCount(void *nativeView, int count) {
+extern "C" DOTNET_EXPORT void filament_View_nSetSampleCount(void *nativeView, int count) {
     View *view = (View *) nativeView;
     view->setSampleCount((uint8_t) count);
 }
 
-extern "C" void *filament_View_nGetDirectionalLightCamera(void *nativeView) {
+extern "C" DOTNET_EXPORT void *filament_View_nGetDirectionalLightCamera(void *nativeView) {
     View *view = (View *) nativeView;
     return (void *) view->getDirectionalLightCamera();
 }
 
-extern "C" int filament_View_nGetSampleCount(void *nativeView) {
+extern "C" DOTNET_EXPORT int filament_View_nGetSampleCount(void *nativeView) {
     View *view = (View *) nativeView;
     return view->getSampleCount();
 }
 
-extern "C" void filament_View_nSetAntiAliasing(void *nativeView, int type) {
+extern "C" DOTNET_EXPORT void filament_View_nSetAntiAliasing(void *nativeView, int type) {
     View *view = (View *) nativeView;
     view->setAntiAliasing(View::AntiAliasing(type));
 }
 
-extern "C" int filament_View_nGetAntiAliasing(void *nativeView) {
+extern "C" DOTNET_EXPORT int filament_View_nGetAntiAliasing(void *nativeView) {
     View *view = (View *) nativeView;
     return (int) view->getAntiAliasing();
 }
 
-extern "C" void filament_View_nSetDithering(void *nativeView, int dithering) {
+extern "C" DOTNET_EXPORT void filament_View_nSetDithering(void *nativeView, int dithering) {
     View *view = (View *) nativeView;
     view->setDithering((View::Dithering) dithering);
 }
 
-extern "C" int filament_View_nGetDithering(void *nativeView) {
+extern "C" DOTNET_EXPORT int filament_View_nGetDithering(void *nativeView) {
     View *view = (View *) nativeView;
     return (int) view->getDithering();
 }
 
-extern "C" void filament_View_nSetDynamicResolutionOptions(void *nativeView, bool enabled, bool homogeneousScaling,
+extern "C" DOTNET_EXPORT void filament_View_nSetDynamicResolutionOptions(void *nativeView, bool enabled, bool homogeneousScaling,
                                                            float minScale, float maxScale, int quality) {
     View *view = (View *) nativeView;
     View::DynamicResolutionOptions options;
@@ -105,51 +106,55 @@ extern "C" void filament_View_nSetDynamicResolutionOptions(void *nativeView, boo
     view->setDynamicResolutionOptions(options);
 }
 
-extern "C" void filament_View_nSetShadowType(void *nativeView, int type) {
+extern "C" DOTNET_EXPORT void filament_View_nSetShadowType(void *nativeView, int type) {
     View *view = (View *) nativeView;
     view->setShadowType((View::ShadowType) type);
 }
 
-extern "C" void filament_View_nSetVsmShadowOptions(void *nativeView, int anisotropy) {
+extern "C" DOTNET_EXPORT void filament_View_nSetVsmShadowOptions(void *nativeView, int anisotropy, bool mipmapping, float exponent, float minVarianceScale, float lightBleedReduction) {
     View *view = (View *) nativeView;
     View::VsmShadowOptions options;
-    options.anisotropy = (uint8_t) anisotropy;
+    options.anisotropy = (uint8_t)anisotropy;
+    options.mipmapping = (bool)mipmapping;
+    options.exponent = exponent;
+    options.minVarianceScale = minVarianceScale;
+    options.lightBleedReduction = lightBleedReduction;
     view->setVsmShadowOptions(options);
 }
 
-extern "C" void filament_View_nSetRenderQuality(void *nativeView, int hdrColorBufferQuality) {
+extern "C" DOTNET_EXPORT void filament_View_nSetRenderQuality(void *nativeView, int hdrColorBufferQuality) {
     View *view = (View *) nativeView;
     View::RenderQuality renderQuality;
     renderQuality.hdrColorBuffer = View::QualityLevel(hdrColorBufferQuality);
     view->setRenderQuality(renderQuality);
 }
 
-extern "C" void filament_View_nSetDynamicLightingOptions(void *nativeView, float zLightNear, float zLightFar) {
+extern "C" DOTNET_EXPORT void filament_View_nSetDynamicLightingOptions(void *nativeView, float zLightNear, float zLightFar) {
     View *view = (View *) nativeView;
     view->setDynamicLightingOptions(zLightNear, zLightFar);
 }
 
-extern "C" void filament_View_nSetPostProcessingEnabled(void *nativeView, bool enabled) {
+extern "C" DOTNET_EXPORT void filament_View_nSetPostProcessingEnabled(void *nativeView, bool enabled) {
     View *view = (View *) nativeView;
     view->setPostProcessingEnabled(enabled);
 }
 
-extern "C" bool filament_View_nIsPostProcessingEnabled(void *nativeView) {
+extern "C" DOTNET_EXPORT bool filament_View_nIsPostProcessingEnabled(void *nativeView) {
     View *view = (View *) nativeView;
     return static_cast<bool>(view->isPostProcessingEnabled());
 }
 
-extern "C" void filament_View_nSetFrontFaceWindingInverted(void *nativeView, bool inverted) {
+extern "C" DOTNET_EXPORT void filament_View_nSetFrontFaceWindingInverted(void *nativeView, bool inverted) {
     View *view = (View *) nativeView;
     view->setFrontFaceWindingInverted(inverted);
 }
 
-extern "C" bool filament_View_nIsFrontFaceWindingInverted(void *nativeView) {
+extern "C" DOTNET_EXPORT bool filament_View_nIsFrontFaceWindingInverted(void *nativeView) {
     View *view = (View *) nativeView;
     return static_cast<bool>(view->isFrontFaceWindingInverted());
 }
 
-extern "C" void filament_View_nSetAmbientOcclusion(void *nativeView, int ordinal) {
+extern "C" DOTNET_EXPORT void filament_View_nSetAmbientOcclusion(void *nativeView, int ordinal) {
     View *view = (View *) nativeView;
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -157,7 +162,7 @@ extern "C" void filament_View_nSetAmbientOcclusion(void *nativeView, int ordinal
 #pragma clang diagnostic pop
 }
 
-extern "C" int filament_View_nGetAmbientOcclusion(void *nativeView) {
+extern "C" DOTNET_EXPORT int filament_View_nGetAmbientOcclusion(void *nativeView) {
     View *view = (View *) nativeView;
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -165,8 +170,9 @@ extern "C" int filament_View_nGetAmbientOcclusion(void *nativeView) {
 #pragma clang diagnostic pop
 }
 
-extern "C" void filament_View_nSetAmbientOcclusionOptions(
+extern "C" DOTNET_EXPORT void filament_View_nSetAmbientOcclusionOptions(
         void *nativeView, float radius, float bias, float power, float resolution, float intensity,
+        float bilateralThreshold,
         int quality, int lowPassFilter, int upsampling, bool enabled, float minHorizonAngleRad,
         float ssctLightConeRad, float ssctStartTraceDistance,
         float ssctContactDistanceMax,
@@ -181,6 +187,7 @@ extern "C" void filament_View_nSetAmbientOcclusionOptions(
     options.bias = bias;
     options.resolution = resolution;
     options.intensity = intensity;
+    options.bilateralThreshold = bilateralThreshold;
     options.quality = (View::QualityLevel) quality;
     options.lowPassFilter = (View::QualityLevel) lowPassFilter;
     options.upsampling = (View::QualityLevel) upsampling;
@@ -199,7 +206,7 @@ extern "C" void filament_View_nSetAmbientOcclusionOptions(
     view->setAmbientOcclusionOptions(options);
 }
 
-extern "C" void filament_View_nSetBloomOptions(
+extern "C" DOTNET_EXPORT void filament_View_nSetBloomOptions(
         void *nativeView, void *nativeTexture,
         float dirtStrength, float strength, int resolution, float anamorphism, int levels,
         int blendMode, bool threshold, bool enabled, float highlight, bool lensFlare, bool starburst,
@@ -231,7 +238,7 @@ extern "C" void filament_View_nSetBloomOptions(
     view->setBloomOptions(options);
 }
 
-extern "C" void filament_View_nSetFogOptions(void *nativeView,
+extern "C" DOTNET_EXPORT void filament_View_nSetFogOptions(void *nativeView,
                                              float distance, float maximumOpacity, float height,
                                              float heightFalloff, float r,
                                              float g, float b, float density, float inScatteringStart,
@@ -252,12 +259,12 @@ extern "C" void filament_View_nSetFogOptions(void *nativeView,
     view->setFogOptions(options);
 }
 
-extern "C" void filament_View_nSetBlendMode(void *nativeView, int blendMode) {
+extern "C" DOTNET_EXPORT void filament_View_nSetBlendMode(void *nativeView, int blendMode) {
     View *view = (View *) nativeView;
     view->setBlendMode((View::BlendMode) blendMode);
 }
 
-extern "C" void filament_View_nSetDepthOfFieldOptions(void *nativeView, float focusDistance, float cocScale,
+extern "C" DOTNET_EXPORT void filament_View_nSetDepthOfFieldOptions(void *nativeView, float cocScale,
                                                       float maxApertureDiameter, bool enabled, int filter,
                                                       bool nativeResolution, int foregroundRingCount,
                                                       int backgroundRingCount, int fastGatherRingCount,
@@ -268,7 +275,7 @@ extern "C" void filament_View_nSetDepthOfFieldOptions(void *nativeView, float fo
         // View::DepthOfFieldOptions::Filter::MEDIAN value is actually 2
         eFilter = View::DepthOfFieldOptions::Filter::MEDIAN;
     }
-    view->setDepthOfFieldOptions({.focusDistance = focusDistance, .cocScale = cocScale,
+    view->setDepthOfFieldOptions({.cocScale = cocScale,
         .maxApertureDiameter = maxApertureDiameter, .enabled = (bool)enabled, .filter = eFilter,
         .nativeResolution = (bool)nativeResolution,
         .foregroundRingCount = (uint8_t)foregroundRingCount,
@@ -279,7 +286,7 @@ extern "C" void filament_View_nSetDepthOfFieldOptions(void *nativeView, float fo
     });
 }
 
-extern "C" void filament_View_nSetVignetteOptions(void *nativeView, float midPoint, float roundness,
+extern "C" DOTNET_EXPORT void filament_View_nSetVignetteOptions(void *nativeView, float midPoint, float roundness,
                                                   float feather, float r, float g, float b, float a,
                                                   bool enabled) {
     View *view = (View *) nativeView;
@@ -287,29 +294,29 @@ extern "C" void filament_View_nSetVignetteOptions(void *nativeView, float midPoi
                                      .color = LinearColorA{r, g, b, a}, .enabled = (bool) enabled});
 }
 
-extern "C" void filament_View_nSetTemporalAntiAliasingOptions(void *nativeView, float feedback, float filterWidth,
+extern "C" DOTNET_EXPORT void filament_View_nSetTemporalAntiAliasingOptions(void *nativeView, float feedback, float filterWidth,
                                                               bool enabled) {
     View *view = (View *) nativeView;
     view->setTemporalAntiAliasingOptions({
                                                  .filterWidth = filterWidth, .feedback = feedback, .enabled = (bool) enabled});
 }
 
-extern "C" bool filament_View_nIsShadowingEnabled(void *nativeView) {
+extern "C" DOTNET_EXPORT bool filament_View_nIsShadowingEnabled(void *nativeView) {
     View *view = (View *) nativeView;
     return (bool) view->isShadowingEnabled();
 }
 
-extern "C" void filament_View_nSetScreenSpaceRefractionEnabled(void *nativeView, bool enabled) {
+extern "C" DOTNET_EXPORT void filament_View_nSetScreenSpaceRefractionEnabled(void *nativeView, bool enabled) {
     View *view = (View *) nativeView;
     view->setScreenSpaceRefractionEnabled((bool) enabled);
 }
 
-extern "C" bool filament_View_nIsScreenSpaceRefractionEnabled(void *nativeView) {
+extern "C" DOTNET_EXPORT bool filament_View_nIsScreenSpaceRefractionEnabled(void *nativeView) {
     View *view = (View *) nativeView;
     return (bool) view->isScreenSpaceRefractionEnabled();
 }
 
-extern "C" void filament_View_nGetViewport(void *nativeView, int &left, int &bottom, int &width, int &height) {
+extern "C" DOTNET_EXPORT void filament_View_nGetViewport(void *nativeView, int &left, int &bottom, int &width, int &height) {
     View *view = (View *) nativeView;
     Viewport viewport = view->getViewport();
 

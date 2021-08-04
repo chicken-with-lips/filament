@@ -1,19 +1,20 @@
+#include "../Export.h"
 #include <filament/Engine.h>
 #include <image/LinearImage.h>
 
 using namespace filament;
 using namespace image;
 
-extern "C" void *filament_Image_LinearImage_Create(int width, int height, int channels) {
+extern "C" DOTNET_EXPORT void *filament_Image_LinearImage_Create(int width, int height, int channels) {
     return new LinearImage(width, height, channels);
 }
 
-extern "C" void filament_Image_LinearImage_Destroy(void *nativeImage) {
+extern "C" DOTNET_EXPORT void filament_Image_LinearImage_Destroy(void *nativeImage) {
     LinearImage *image = (LinearImage *) nativeImage;
     delete image;
 }
 
-extern "C" void
+extern "C" DOTNET_EXPORT void
 filament_Image_LinearImage_SetPixelData(void *nativeImage, int column, int row, float r, float g, float b, float a) {
     LinearImage *image = (LinearImage *) nativeImage;
 

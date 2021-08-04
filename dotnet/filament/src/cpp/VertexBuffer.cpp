@@ -1,3 +1,4 @@
+#include "Export.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -11,26 +12,26 @@ using namespace filament;
 using namespace filament::math;
 using namespace backend;
 
-extern "C" void *filament_VertexBuffer_nCreateBuilder() {
+extern "C" DOTNET_EXPORT void *filament_VertexBuffer_nCreateBuilder() {
     return (void *) new VertexBuffer::Builder();
 }
 
-extern "C" void filament_VertexBuffer_nDestroyBuilder(void *nativeBuilder) {
+extern "C" DOTNET_EXPORT void filament_VertexBuffer_nDestroyBuilder(void *nativeBuilder) {
     VertexBuffer::Builder *builder = (VertexBuffer::Builder *) nativeBuilder;
     delete builder;
 }
 
-extern "C" void filament_VertexBuffer_nBuilderVertexCount(void *nativeBuilder, int vertexCount) {
+extern "C" DOTNET_EXPORT void filament_VertexBuffer_nBuilderVertexCount(void *nativeBuilder, int vertexCount) {
     VertexBuffer::Builder *builder = (VertexBuffer::Builder *) nativeBuilder;
     builder->vertexCount((uint32_t) vertexCount);
 }
 
-extern "C" void filament_VertexBuffer_nBuilderBufferCount(void *nativeBuilder, int bufferCount) {
+extern "C" DOTNET_EXPORT void filament_VertexBuffer_nBuilderBufferCount(void *nativeBuilder, int bufferCount) {
     VertexBuffer::Builder *builder = (VertexBuffer::Builder *) nativeBuilder;
     builder->bufferCount((uint8_t) bufferCount);
 }
 
-extern "C" void
+extern "C" DOTNET_EXPORT void
 filament_VertexBuffer_nBuilderAttribute(void *nativeBuilder, int attribute, int bufferIndex, int attributeType,
                                         int byteOffset,
                                         int byteStride) {
@@ -40,23 +41,23 @@ filament_VertexBuffer_nBuilderAttribute(void *nativeBuilder, int attribute, int 
                        (uint32_t) byteOffset, (uint8_t) byteStride);
 }
 
-extern "C" void filament_VertexBuffer_nBuilderNormalized(void *nativeBuilder, int attribute, bool normalized) {
+extern "C" DOTNET_EXPORT void filament_VertexBuffer_nBuilderNormalized(void *nativeBuilder, int attribute, bool normalized) {
     VertexBuffer::Builder *builder = (VertexBuffer::Builder *) nativeBuilder;
     builder->normalized((VertexAttribute) attribute, normalized);
 }
 
-extern "C" void *filament_VertexBuffer_nBuilderBuild(void *nativeBuilder, void *nativeEngine) {
+extern "C" DOTNET_EXPORT void *filament_VertexBuffer_nBuilderBuild(void *nativeBuilder, void *nativeEngine) {
     VertexBuffer::Builder *builder = (VertexBuffer::Builder *) nativeBuilder;
     Engine *engine = (Engine *) nativeEngine;
     return (void *) builder->build(*engine);
 }
 
-extern "C" int filament_VertexBuffer_nGetVertexCount(void *nativeVertexBuffer) {
+extern "C" DOTNET_EXPORT int filament_VertexBuffer_nGetVertexCount(void *nativeVertexBuffer) {
     VertexBuffer *vertexBuffer = (VertexBuffer *) nativeVertexBuffer;
     return vertexBuffer->getVertexCount();
 }
 
-extern "C" void filament_VertexBuffer_nSetBufferAt(void *nativeVertexBuffer, void *nativeEngine, int bufferIndex,
+extern "C" DOTNET_EXPORT void filament_VertexBuffer_nSetBufferAt(void *nativeVertexBuffer, void *nativeEngine, int bufferIndex,
                                                    void *buffer, int bufferSizeInBytes,
                                                    int destOffsetInBytes) {
     // FIXME: is copying the best thing to do here?

@@ -1,10 +1,5 @@
-#include <geometry/SurfaceOrientation.h>
 
 #include <algorithm>
-
-using namespace filament;
-using namespace filament::geometry;
-using namespace filament::math;
 
 // FIXME:
 //namespace {

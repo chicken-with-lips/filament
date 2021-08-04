@@ -1,9 +1,10 @@
+#include "Export.h"
 #include <math/mat3.h>
 #include <math/quat.h>
 
 using namespace filament::math;
 
-extern "C" void filament_MathUtils_nPackTangentFrame(float tangentX, float tangentY, float tangentZ,
+extern "C" DOTNET_EXPORT void filament_MathUtils_nPackTangentFrame(float tangentX, float tangentY, float tangentZ,
                                                      float bitangentX, float bitangentY, float bitangentZ,
                                                      float normalX, float normalY, float normalZ,
                                                      float *quaternion, int offset) {

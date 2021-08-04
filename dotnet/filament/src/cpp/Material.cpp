@@ -1,8 +1,9 @@
+#include "Export.h"
 #include <filament/Material.h>
 
 using namespace filament;
 
-extern "C" void *filament_Material_nBuilderBuild(void *nativeEngine, void *buffer, int bufferSizeInBytes) {
+extern "C" DOTNET_EXPORT void *filament_Material_nBuilderBuild(void *nativeEngine, void *buffer, int bufferSizeInBytes) {
     Engine *engine = (Engine *) nativeEngine;
 
     // FIXME: is copying the best thing to do here?
@@ -16,18 +17,18 @@ extern "C" void *filament_Material_nBuilderBuild(void *nativeEngine, void *buffe
     return (void *) material;
 }
 
-extern "C" void *filament_Material_nGetDefaultInstance(void *nativeMaterial) {
+extern "C" DOTNET_EXPORT void *filament_Material_nGetDefaultInstance(void *nativeMaterial) {
     Material const *material = (Material const *) nativeMaterial;
     return (void *) material->getDefaultInstance();
 }
 
-extern "C" void *filament_Material_nCreateInstance(void *nativeMaterial) {
+extern "C" DOTNET_EXPORT void *filament_Material_nCreateInstance(void *nativeMaterial) {
     Material *material = (Material *) nativeMaterial;
     return (void *) material->createInstance();
 }
 
 // FIXME
-//extern "C" void *filament_Material_nCreateInstanceWithName(void *nativeMaterial, jstring name_) {
+//extern "C" DOTNET_EXPORT void *filament_Material_nCreateInstanceWithName(void *nativeMaterial, jstring name_) {
 //    Material *material = (Material *) nativeMaterial;
 //    const char *name = env->GetStringUTFChars(name_, 0);
 //    void *instance = (void *) material->createInstance(name);
@@ -35,88 +36,88 @@ extern "C" void *filament_Material_nCreateInstance(void *nativeMaterial) {
 //    return instance;
 //}
 
-extern "C" const char *filament_Material_nGetName(void *nativeMaterial) {
+extern "C" DOTNET_EXPORT const char *filament_Material_nGetName(void *nativeMaterial) {
     Material *material = (Material *) nativeMaterial;
     return material->getName();
 }
 
-extern "C" int filament_Material_nGetShading(void *nativeMaterial) {
+extern "C" DOTNET_EXPORT int filament_Material_nGetShading(void *nativeMaterial) {
     Material *material = (Material *) nativeMaterial;
     return (int) material->getShading();
 }
 
-extern "C" int filament_Material_nGetInterpolation(void *nativeMaterial) {
+extern "C" DOTNET_EXPORT int filament_Material_nGetInterpolation(void *nativeMaterial) {
     Material *material = (Material *) nativeMaterial;
     return (int) material->getInterpolation();
 }
 
-extern "C" int filament_Material_nGetBlendingMode(void *nativeMaterial) {
+extern "C" DOTNET_EXPORT int filament_Material_nGetBlendingMode(void *nativeMaterial) {
     Material *material = (Material *) nativeMaterial;
     return (int) material->getBlendingMode();
 }
 
-extern "C" int filament_Material_nGetRefractionMode(void *nativeMaterial) {
+extern "C" DOTNET_EXPORT int filament_Material_nGetRefractionMode(void *nativeMaterial) {
     Material *material = (Material *) nativeMaterial;
     return (int) material->getRefractionMode();
 }
 
-extern "C" int filament_Material_nGetRefractionType(void *nativeMaterial) {
+extern "C" DOTNET_EXPORT int filament_Material_nGetRefractionType(void *nativeMaterial) {
     Material *material = (Material *) nativeMaterial;
     return (int) material->getRefractionType();
 }
 
-extern "C" int filament_Material_nGetVertexDomain(void *nativeMaterial) {
+extern "C" DOTNET_EXPORT int filament_Material_nGetVertexDomain(void *nativeMaterial) {
     Material *material = (Material *) nativeMaterial;
     return (int) material->getVertexDomain();
 }
 
-extern "C" int filament_Material_nGetCullingMode(void *nativeMaterial) {
+extern "C" DOTNET_EXPORT int filament_Material_nGetCullingMode(void *nativeMaterial) {
     Material *material = (Material *) nativeMaterial;
     return (int) material->getCullingMode();
 }
 
-extern "C" bool filament_Material_nIsColorWriteEnabled(void *nativeMaterial) {
+extern "C" DOTNET_EXPORT bool filament_Material_nIsColorWriteEnabled(void *nativeMaterial) {
     Material *material = (Material *) nativeMaterial;
     return material->isColorWriteEnabled();
 }
 
-extern "C" bool filament_Material_nIsDepthWriteEnabled(void *nativeMaterial) {
+extern "C" DOTNET_EXPORT bool filament_Material_nIsDepthWriteEnabled(void *nativeMaterial) {
     Material *material = (Material *) nativeMaterial;
     return material->isDepthWriteEnabled();
 }
 
-extern "C" bool filament_Material_nIsDepthCullingEnabled(void *nativeMaterial) {
+extern "C" DOTNET_EXPORT bool filament_Material_nIsDepthCullingEnabled(void *nativeMaterial) {
     Material *material = (Material *) nativeMaterial;
     return material->isDepthCullingEnabled();
 }
 
-extern "C" bool filament_Material_nIsDoubleSided(void *nativeMaterial) {
+extern "C" DOTNET_EXPORT bool filament_Material_nIsDoubleSided(void *nativeMaterial) {
     Material *material = (Material *) nativeMaterial;
     return material->isDoubleSided();
 }
 
-extern "C" float filament_Material_nGetMaskThreshold(void *nativeMaterial) {
+extern "C" DOTNET_EXPORT float filament_Material_nGetMaskThreshold(void *nativeMaterial) {
     Material *material = (Material *) nativeMaterial;
     return material->getMaskThreshold();
 }
 
-extern "C" float filament_Material_nGetSpecularAntiAliasingVariance(void *nativeMaterial) {
+extern "C" DOTNET_EXPORT float filament_Material_nGetSpecularAntiAliasingVariance(void *nativeMaterial) {
     Material *material = (Material *) nativeMaterial;
     return material->getSpecularAntiAliasingVariance();
 }
 
-extern "C" float filament_Material_nGetSpecularAntiAliasingThreshold(void *nativeMaterial) {
+extern "C" DOTNET_EXPORT float filament_Material_nGetSpecularAntiAliasingThreshold(void *nativeMaterial) {
     Material *material = (Material *) nativeMaterial;
     return material->getSpecularAntiAliasingThreshold();
 }
 
-extern "C" int filament_Material_nGetParameterCount(void *nativeMaterial) {
+extern "C" DOTNET_EXPORT int filament_Material_nGetParameterCount(void *nativeMaterial) {
     Material *material = (Material *) nativeMaterial;
     return material->getParameterCount();
 }
 
 // FIXME
-//extern "C" void filament_Material_nGetParameters(void *nativeMaterial, jobject parameters, int count) {
+//extern "C" DOTNET_EXPORT void filament_Material_nGetParameters(void *nativeMaterial, jobject parameters, int count) {
 //    Material *material = (Material *) nativeMaterial;
 //
 //    Material::ParameterInfo *info = new Material::ParameterInfo[count];
@@ -158,12 +159,12 @@ extern "C" int filament_Material_nGetParameterCount(void *nativeMaterial) {
 //    delete[] info;
 //}
 
-extern "C" int filament_Material_nGetRequiredAttributes(void *nativeMaterial) {
+extern "C" DOTNET_EXPORT int filament_Material_nGetRequiredAttributes(void *nativeMaterial) {
     Material *material = (Material *) nativeMaterial;
     return material->getRequiredAttributes().getValue();
 }
 
-extern "C" bool filament_Material_nHasParameter(void *nativeMaterial, const char *name_) {
+extern "C" DOTNET_EXPORT bool filament_Material_nHasParameter(void *nativeMaterial, const char *name_) {
     Material *material = (Material *) nativeMaterial;
     return material->hasParameter(name_);
 }

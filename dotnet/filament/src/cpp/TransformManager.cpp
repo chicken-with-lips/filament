@@ -1,3 +1,4 @@
+#include "Export.h"
 #include <iostream>
 
 #include <filament/TransformManager.h>
@@ -8,19 +9,19 @@ using namespace utils;
 using namespace filament;
 using namespace filament::math;
 
-extern "C" bool filament_TransformManager_nHasComponent(void *nativeTransformManager, int entity_) {
+extern "C" DOTNET_EXPORT bool filament_TransformManager_nHasComponent(void *nativeTransformManager, int entity_) {
     TransformManager *tm = (TransformManager *) nativeTransformManager;
     Entity &entity = *reinterpret_cast<Entity *>(&entity_);
     return tm->hasComponent(entity);
 }
 
-extern "C" int filament_TransformManager_nGetInstance(void *nativeTransformManager, int entity_) {
+extern "C" DOTNET_EXPORT int filament_TransformManager_nGetInstance(void *nativeTransformManager, int entity_) {
     TransformManager *tm = (TransformManager *) nativeTransformManager;
     Entity &entity = *reinterpret_cast<Entity *>(&entity_);
     return tm->getInstance(entity);
 }
 
-extern "C" int filament_TransformManager_nCreate(void *nativeTransformManager, int entity_) {
+extern "C" DOTNET_EXPORT int filament_TransformManager_nCreate(void *nativeTransformManager, int entity_) {
     TransformManager *tm = (TransformManager *) nativeTransformManager;
     Entity &entity = *reinterpret_cast<Entity *>(&entity_);
     tm->create(entity);
@@ -28,7 +29,7 @@ extern "C" int filament_TransformManager_nCreate(void *nativeTransformManager, i
 }
 
 // TODO
-//extern "C" int filament_TransformManager_nCreateArray(void *nativeTransformManager, int entity_, int parent,
+//extern "C" DOTNET_EXPORT int filament_TransformManager_nCreateArray(void *nativeTransformManager, int entity_, int parent,
 //                                                      jfloatArray localTransform_) {
 //    TransformManager *tm = (TransformManager *) nativeTransformManager;
 //    Entity &entity = *reinterpret_cast<Entity *>(&entity_);
@@ -43,19 +44,19 @@ extern "C" int filament_TransformManager_nCreate(void *nativeTransformManager, i
 //    return tm->getInstance(entity);
 //}
 
-extern "C" void filament_TransformManager_nDestroy(void *nativeTransformManager, int entity_) {
+extern "C" DOTNET_EXPORT void filament_TransformManager_nDestroy(void *nativeTransformManager, int entity_) {
     TransformManager *tm = (TransformManager *) nativeTransformManager;
     Entity &entity = *reinterpret_cast<Entity *>(&entity_);
     tm->destroy(entity);
 }
 
-extern "C" void filament_TransformManager_nSetParent(void *nativeTransformManager, int i, int newParent) {
+extern "C" DOTNET_EXPORT void filament_TransformManager_nSetParent(void *nativeTransformManager, int i, int newParent) {
     TransformManager *tm = (TransformManager *) nativeTransformManager;
     tm->setParent((TransformManager::Instance) i,
                   (TransformManager::Instance) newParent);
 }
 
-extern "C" void
+extern "C" DOTNET_EXPORT void
 filament_TransformManager_nSetTransform(void *nativeTransformManager, int i, float* localTransform_) {
     TransformManager *tm = (TransformManager *) nativeTransformManager;
     tm->setTransform((TransformManager::Instance) i,
@@ -63,7 +64,7 @@ filament_TransformManager_nSetTransform(void *nativeTransformManager, int i, flo
 }
 
 // FIXME:
-//extern "C" void
+//extern "C" DOTNET_EXPORT void
 //filament_TransformManager_nGetTransform(void *nativeTransformManager, int i, jfloatArray outLocalTransform_) {
 //    TransformManager *tm = (TransformManager *) nativeTransformManager;
 //    jfloat *outLocalTransform = env->GetFloatArrayElements(outLocalTransform_, NULL);
@@ -72,7 +73,7 @@ filament_TransformManager_nSetTransform(void *nativeTransformManager, int i, flo
 //    env->ReleaseFloatArrayElements(outLocalTransform_, outLocalTransform, 0);
 //}
 
-extern "C" void
+extern "C" DOTNET_EXPORT void
 filament_TransformManager_nGetWorldTransform(void *nativeTransformManager, int i, float* outWorldTransform_) {
     TransformManager *tm = (TransformManager *) nativeTransformManager;
     mat4f transform = tm->getWorldTransform((TransformManager::Instance) i);
@@ -84,12 +85,12 @@ filament_TransformManager_nGetWorldTransform(void *nativeTransformManager, int i
     }
 }
 
-extern "C" void filament_TransformManager_nOpenLocalTransformTransaction(void *nativeTransformManager) {
+extern "C" DOTNET_EXPORT void filament_TransformManager_nOpenLocalTransformTransaction(void *nativeTransformManager) {
     TransformManager *tm = (TransformManager *) nativeTransformManager;
     tm->openLocalTransformTransaction();
 }
 
-extern "C" void filament_TransformManager_nCommitLocalTransformTransaction(void *nativeTransformManager) {
+extern "C" DOTNET_EXPORT void filament_TransformManager_nCommitLocalTransformTransaction(void *nativeTransformManager) {
     TransformManager *tm = (TransformManager *) nativeTransformManager;
     tm->commitLocalTransformTransaction();
 }

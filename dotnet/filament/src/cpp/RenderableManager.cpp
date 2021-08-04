@@ -1,3 +1,4 @@
+#include "Export.h"
 #include <filament/RenderableManager.h>
 #include <filament/MaterialInstance.h>
 
@@ -6,37 +7,37 @@
 using namespace filament;
 using namespace utils;
 
-extern "C" bool filament_RenderableManager_nHasComponent(void *nativeRenderableManager, int entity) {
+extern "C" DOTNET_EXPORT bool filament_RenderableManager_nHasComponent(void *nativeRenderableManager, int entity) {
     RenderableManager *rm = (RenderableManager *) nativeRenderableManager;
     return rm->hasComponent((Entity &) entity);
 }
 
-extern "C" int filament_RenderableManager_nGetInstance(void *nativeRenderableManager, int entity) {
+extern "C" DOTNET_EXPORT int filament_RenderableManager_nGetInstance(void *nativeRenderableManager, int entity) {
     RenderableManager *rm = (RenderableManager *) nativeRenderableManager;
     return rm->getInstance((Entity &) entity);
 }
 
-extern "C" void filament_RenderableManager_nDestroy(void *nativeRenderableManager, int entity) {
+extern "C" DOTNET_EXPORT void filament_RenderableManager_nDestroy(void *nativeRenderableManager, int entity) {
     RenderableManager *rm = (RenderableManager *) nativeRenderableManager;
     rm->destroy((Entity &) entity);
 }
 
-extern "C" void *filament_RenderableManager_nCreateBuilder(int count) {
+extern "C" DOTNET_EXPORT void *filament_RenderableManager_nCreateBuilder(int count) {
     return (void *) new RenderableManager::Builder((size_t) count);
 }
 
-extern "C" void filament_RenderableManager_nDestroyBuilder(void *nativeBuilder) {
+extern "C" DOTNET_EXPORT void filament_RenderableManager_nDestroyBuilder(void *nativeBuilder) {
     RenderableManager::Builder *builder = (RenderableManager::Builder *) nativeBuilder;
     delete builder;
 }
 
-extern "C" bool filament_RenderableManager_nBuilderBuild(void *nativeBuilder, void *nativeEngine, int entity) {
+extern "C" DOTNET_EXPORT bool filament_RenderableManager_nBuilderBuild(void *nativeBuilder, void *nativeEngine, int entity) {
     RenderableManager::Builder *builder = (RenderableManager::Builder *) nativeBuilder;
     Engine *engine = (Engine *) nativeEngine;
     return bool(builder->build(*engine, (Entity &) entity) == RenderableManager::Builder::Success);
 }
 
-extern "C" void filament_RenderableManager_nBuilderGeometry__JIIJJ(void *nativeBuilder, int index,
+extern "C" DOTNET_EXPORT void filament_RenderableManager_nBuilderGeometry__JIIJJ(void *nativeBuilder, int index,
                                                                    int primitiveType, void *nativeVertexBuffer,
                                                                    void *nativeIndexBuffer) {
     RenderableManager::Builder *builder = (RenderableManager::Builder *) nativeBuilder;
@@ -45,7 +46,7 @@ extern "C" void filament_RenderableManager_nBuilderGeometry__JIIJJ(void *nativeB
     builder->geometry((size_t) index, (RenderableManager::PrimitiveType) primitiveType, vertexBuffer, indexBuffer);
 }
 
-extern "C" void filament_RenderableManager_nBuilderGeometry__JIIJJII(void *nativeBuilder,
+extern "C" DOTNET_EXPORT void filament_RenderableManager_nBuilderGeometry__JIIJJII(void *nativeBuilder,
                                                                      int index,
                                                                      int primitiveType,
                                                                      void *nativeVertexBuffer,
@@ -58,7 +59,7 @@ extern "C" void filament_RenderableManager_nBuilderGeometry__JIIJJII(void *nativ
                       (size_t) offset, (size_t) count);
 }
 
-extern "C" void filament_RenderableManager_nBuilderGeometry__JIIJJIIII(void *nativeBuilder,
+extern "C" DOTNET_EXPORT void filament_RenderableManager_nBuilderGeometry__JIIJJIIII(void *nativeBuilder,
                                                                        int index,
                                                                        int primitiveType,
                                                                        void *nativeVertexBuffer,
@@ -74,18 +75,18 @@ extern "C" void filament_RenderableManager_nBuilderGeometry__JIIJJIIII(void *nat
                       (size_t) count);
 }
 
-extern "C" void
+extern "C" DOTNET_EXPORT void
 filament_RenderableManager_nBuilderMaterial(void *nativeBuilder, int index, void *nativeMaterialInstance) {
     RenderableManager::Builder *builder = (RenderableManager::Builder *) nativeBuilder;
     builder->material((size_t) index, (const MaterialInstance *) nativeMaterialInstance);
 }
 
-extern "C" void filament_RenderableManager_nBuilderBlendOrder(void *nativeBuilder, int index, int blendOrder) {
+extern "C" DOTNET_EXPORT void filament_RenderableManager_nBuilderBlendOrder(void *nativeBuilder, int index, int blendOrder) {
     RenderableManager::Builder *builder = (RenderableManager::Builder *) nativeBuilder;
     builder->blendOrder((size_t) index, (uint16_t) blendOrder);
 }
 
-extern "C" void
+extern "C" DOTNET_EXPORT void
 filament_RenderableManager_nBuilderBoundingBox(void *nativeBuilder, float cx, float cy,
                                                float cz, float ex, float ey, float ez) {
     RenderableManager::Builder *builder = (RenderableManager::Builder *) nativeBuilder;
@@ -93,44 +94,44 @@ filament_RenderableManager_nBuilderBoundingBox(void *nativeBuilder, float cx, fl
                           {ex, ey, ez}});
 }
 
-extern "C" void filament_RenderableManager_nBuilderLayerMask(void *nativeBuilder, int select, int value) {
+extern "C" DOTNET_EXPORT void filament_RenderableManager_nBuilderLayerMask(void *nativeBuilder, int select, int value) {
     RenderableManager::Builder *builder = (RenderableManager::Builder *) nativeBuilder;
     builder->layerMask((uint8_t) select, (uint8_t) value);
 }
 
-extern "C" void filament_RenderableManager_nBuilderPriority(void *nativeBuilder, int priority) {
+extern "C" DOTNET_EXPORT void filament_RenderableManager_nBuilderPriority(void *nativeBuilder, int priority) {
     RenderableManager::Builder *builder = (RenderableManager::Builder *) nativeBuilder;
     builder->priority((uint8_t) priority);
 }
 
-extern "C" void filament_RenderableManager_nBuilderCulling(void *nativeBuilder, bool enabled) {
+extern "C" DOTNET_EXPORT void filament_RenderableManager_nBuilderCulling(void *nativeBuilder, bool enabled) {
     RenderableManager::Builder *builder = (RenderableManager::Builder *) nativeBuilder;
     builder->culling(enabled);
 }
 
-extern "C" void
+extern "C" DOTNET_EXPORT void
 filament_RenderableManager_nBuilderCastShadows(void *nativeBuilder, bool enabled) {
     RenderableManager::Builder *builder = (RenderableManager::Builder *) nativeBuilder;
     builder->castShadows(enabled);
 }
 
-extern "C" void filament_RenderableManager_nBuilderReceiveShadows(void *nativeBuilder, bool enabled) {
+extern "C" DOTNET_EXPORT void filament_RenderableManager_nBuilderReceiveShadows(void *nativeBuilder, bool enabled) {
     RenderableManager::Builder *builder = (RenderableManager::Builder *) nativeBuilder;
     builder->receiveShadows(enabled);
 }
 
-extern "C" void filament_RenderableManager_nBuilderScreenSpaceContactShadows(void *nativeBuilder, bool enabled) {
+extern "C" DOTNET_EXPORT void filament_RenderableManager_nBuilderScreenSpaceContactShadows(void *nativeBuilder, bool enabled) {
     RenderableManager::Builder *builder = (RenderableManager::Builder *) nativeBuilder;
     builder->screenSpaceContactShadows(enabled);
 }
 
-extern "C" void filament_RenderableManager_nBuilderSkinning(void *nativeBuilder, int boneCount) {
+extern "C" DOTNET_EXPORT void filament_RenderableManager_nBuilderSkinning(void *nativeBuilder, int boneCount) {
     RenderableManager::Builder *builder = (RenderableManager::Builder *) nativeBuilder;
     builder->skinning((size_t) boneCount);
 }
 
 // FIXME
-//extern "C" int filament_RenderableManager_nBuilderSkinningBones(void *nativeBuilder, int boneCount, jobject bones,
+//extern "C" DOTNET_EXPORT int filament_RenderableManager_nBuilderSkinningBones(void *nativeBuilder, int boneCount, jobject bones,
 //                                                                int remaining) {
 //    RenderableManager::Builder *builder = (RenderableManager::Builder *) nativeBuilder;
 //    AutoBuffer nioBuffer(env, bones, boneCount * 8);
@@ -144,13 +145,13 @@ extern "C" void filament_RenderableManager_nBuilderSkinning(void *nativeBuilder,
 //    return 0;
 //}
 
-extern "C" void filament_RenderableManager_nBuilderMorphing(void *nativeBuilder, bool enabled) {
+extern "C" DOTNET_EXPORT void filament_RenderableManager_nBuilderMorphing(void *nativeBuilder, bool enabled) {
     RenderableManager::Builder *builder = (RenderableManager::Builder *) nativeBuilder;
     builder->morphing(enabled);
 }
 
 // FIXME
-//extern "C" int filament_RenderableManager_nSetBonesAsMatrices(void *nativeRenderableManager, int i, jobject matrices,
+//extern "C" DOTNET_EXPORT int filament_RenderableManager_nSetBonesAsMatrices(void *nativeRenderableManager, int i, jobject matrices,
 //                                                              int remaining,
 //                                                              int boneCount, int offset) {
 //    RenderableManager *rm = (RenderableManager *) nativeRenderableManager;
@@ -166,7 +167,7 @@ extern "C" void filament_RenderableManager_nBuilderMorphing(void *nativeBuilder,
 //    return 0;
 //}
 
-//extern "C" int
+//extern "C" DOTNET_EXPORT int
 //filament_RenderableManager_nSetBonesAsQuaternions(void *nativeRenderableManager, int i, jobject quaternions,
 //                                                  int remaining,
 //                                                  int boneCount, int offset) {
@@ -183,7 +184,7 @@ extern "C" void filament_RenderableManager_nBuilderMorphing(void *nativeBuilder,
 //    return 0;
 //}
 //
-//extern "C" void
+//extern "C" DOTNET_EXPORT void
 //filament_RenderableManager_nSetMorphWeights(void *nativeRenderableManager, int instance, floatArray weights) {
 //    RenderableManager *rm = (RenderableManager *) nativeRenderableManager;
 //    float *vec = env->GetFloatArrayElements(weights, NULL);
@@ -192,7 +193,7 @@ extern "C" void filament_RenderableManager_nBuilderMorphing(void *nativeBuilder,
 //    rm->setMorphWeights((RenderableManager::Instance) instance, floatvec);
 //}
 
-extern "C" void filament_RenderableManager_nSetAxisAlignedBoundingBox(void *nativeRenderableManager, int i, float cx,
+extern "C" DOTNET_EXPORT void filament_RenderableManager_nSetAxisAlignedBoundingBox(void *nativeRenderableManager, int i, float cx,
                                                                       float cy, float cz,
                                                                       float ex, float ey,
                                                                       float ez) {
@@ -201,49 +202,49 @@ extern "C" void filament_RenderableManager_nSetAxisAlignedBoundingBox(void *nati
                                                                     {ex, ey, ez}});
 }
 
-extern "C" void filament_RenderableManager_nSetLayerMask(void *nativeRenderableManager, int i, int select, int value) {
+extern "C" DOTNET_EXPORT void filament_RenderableManager_nSetLayerMask(void *nativeRenderableManager, int i, int select, int value) {
     RenderableManager *rm = (RenderableManager *) nativeRenderableManager;
     rm->setLayerMask((RenderableManager::Instance) i, (uint8_t) select, (uint8_t) value);
 }
 
-extern "C" void filament_RenderableManager_nSetPriority(void *nativeRenderableManager, int i, int priority) {
+extern "C" DOTNET_EXPORT void filament_RenderableManager_nSetPriority(void *nativeRenderableManager, int i, int priority) {
     RenderableManager *rm = (RenderableManager *) nativeRenderableManager;
     rm->setPriority((RenderableManager::Instance) i, (uint8_t) priority);
 }
 
-extern "C" void filament_RenderableManager_nSetCulling(void *nativeRenderableManager, int i, bool enabled) {
+extern "C" DOTNET_EXPORT void filament_RenderableManager_nSetCulling(void *nativeRenderableManager, int i, bool enabled) {
     RenderableManager *rm = (RenderableManager *) nativeRenderableManager;
     rm->setCulling((RenderableManager::Instance) i, enabled);
 }
 
-extern "C" void filament_RenderableManager_nSetCastShadows(void *nativeRenderableManager, int i, bool enabled) {
+extern "C" DOTNET_EXPORT void filament_RenderableManager_nSetCastShadows(void *nativeRenderableManager, int i, bool enabled) {
     RenderableManager *rm = (RenderableManager *) nativeRenderableManager;
     rm->setCastShadows((RenderableManager::Instance) i, enabled);
 }
 
-extern "C" void filament_RenderableManager_nSetReceiveShadows(void *nativeRenderableManager, int i, bool enabled) {
+extern "C" DOTNET_EXPORT void filament_RenderableManager_nSetReceiveShadows(void *nativeRenderableManager, int i, bool enabled) {
     RenderableManager *rm = (RenderableManager *) nativeRenderableManager;
     rm->setReceiveShadows((RenderableManager::Instance) i, enabled);
 }
 
-extern "C" void
+extern "C" DOTNET_EXPORT void
 filament_RenderableManager_nSetScreenSpaceContactShadows(void *nativeRenderableManager, int i, bool enabled) {
     RenderableManager *rm = (RenderableManager *) nativeRenderableManager;
     rm->setScreenSpaceContactShadows((RenderableManager::Instance) i, enabled);
 }
 
-extern "C" bool filament_RenderableManager_nIsShadowCaster(void *nativeRenderableManager, int i) {
+extern "C" DOTNET_EXPORT bool filament_RenderableManager_nIsShadowCaster(void *nativeRenderableManager, int i) {
     RenderableManager *rm = (RenderableManager *) nativeRenderableManager;
     return (bool) rm->isShadowCaster((RenderableManager::Instance) i);
 }
 
-extern "C" bool filament_RenderableManager_nIsShadowReceiver(void *nativeRenderableManager, int i) {
+extern "C" DOTNET_EXPORT bool filament_RenderableManager_nIsShadowReceiver(void *nativeRenderableManager, int i) {
     RenderableManager *rm = (RenderableManager *) nativeRenderableManager;
     return (bool) rm->isShadowReceiver((RenderableManager::Instance) i);
 }
 
 // FIXME:
-//extern "C" void filament_RenderableManager_nGetAxisAlignedBoundingBox(void *nativeRenderableManager, int i,
+//extern "C" DOTNET_EXPORT void filament_RenderableManager_nGetAxisAlignedBoundingBox(void *nativeRenderableManager, int i,
 //                                                                      floatArray center_,
 //                                                                      floatArray halfExtent_) {
 //    RenderableManager *rm = (RenderableManager *) nativeRenderableManager;
@@ -256,12 +257,12 @@ extern "C" bool filament_RenderableManager_nIsShadowReceiver(void *nativeRendera
 //    env->ReleaseFloatArrayElements(halfExtent_, halfExtent, 0);
 //}
 
-extern "C" int filament_RenderableManager_nGetPrimitiveCount(void *nativeRenderableManager, int i) {
+extern "C" DOTNET_EXPORT int filament_RenderableManager_nGetPrimitiveCount(void *nativeRenderableManager, int i) {
     RenderableManager *rm = (RenderableManager *) nativeRenderableManager;
     return (int) rm->getPrimitiveCount((RenderableManager::Instance) i);
 }
 
-extern "C" void
+extern "C" DOTNET_EXPORT void
 filament_RenderableManager_nSetMaterialInstanceAt(void *nativeRenderableManager, int i, int primitiveIndex,
                                                   void *nativeMaterialInstance) {
     RenderableManager *rm = (RenderableManager *) nativeRenderableManager;
@@ -270,20 +271,20 @@ filament_RenderableManager_nSetMaterialInstanceAt(void *nativeRenderableManager,
                               materialInstance);
 }
 
-extern "C" void *
+extern "C" DOTNET_EXPORT void *
 filament_RenderableManager_nGetMaterialInstanceAt(void *nativeRenderableManager, int i, int primitiveIndex) {
     RenderableManager *rm = (RenderableManager *) nativeRenderableManager;
     return (void *) rm->getMaterialInstanceAt((RenderableManager::Instance) i, (size_t) primitiveIndex);
 }
 
-extern "C" void *filament_RenderableManager_nGetMaterialAt(void *nativeRenderableManager, int i,
+extern "C" DOTNET_EXPORT void *filament_RenderableManager_nGetMaterialAt(void *nativeRenderableManager, int i,
                                                            int primitiveIndex) {
     RenderableManager *rm = (RenderableManager *) nativeRenderableManager;
     MaterialInstance *mi = rm->getMaterialInstanceAt((RenderableManager::Instance) i, (size_t) primitiveIndex);
     return (void *) mi->getMaterial();
 }
 
-extern "C" void filament_RenderableManager_nSetGeometryAt__JIIIJJII(void *nativeRenderableManager,
+extern "C" DOTNET_EXPORT void filament_RenderableManager_nSetGeometryAt__JIIIJJII(void *nativeRenderableManager,
                                                                     int i, int primitiveIndex,
                                                                     int primitiveType,
                                                                     void *nativeVertexBuffer,
@@ -297,7 +298,7 @@ extern "C" void filament_RenderableManager_nSetGeometryAt__JIIIJJII(void *native
                       (size_t) offset, (size_t) count);
 }
 
-extern "C" void filament_RenderableManager_nSetGeometryAt__JIIIII(void *nativeRenderableManager, int i,
+extern "C" DOTNET_EXPORT void filament_RenderableManager_nSetGeometryAt__JIIIII(void *nativeRenderableManager, int i,
                                                                   int primitiveIndex, int primitiveType,
                                                                   int offset,
                                                                   int count) {
@@ -306,14 +307,14 @@ extern "C" void filament_RenderableManager_nSetGeometryAt__JIIIII(void *nativeRe
                       (RenderableManager::PrimitiveType) primitiveType, (size_t) offset, (size_t) count);
 }
 
-extern "C" void filament_RenderableManager_nSetBlendOrderAt(void *nativeRenderableManager, int i,
+extern "C" DOTNET_EXPORT void filament_RenderableManager_nSetBlendOrderAt(void *nativeRenderableManager, int i,
                                                             int primitiveIndex, int blendOrder) {
     RenderableManager *rm = (RenderableManager *) nativeRenderableManager;
     rm->setBlendOrderAt((RenderableManager::Instance) i, (size_t) primitiveIndex,
                         (uint16_t) blendOrder);
 }
 
-extern "C" int
+extern "C" DOTNET_EXPORT int
 filament_RenderableManager_nGetEnabledAttributesAt(void *nativeRenderableManager, int i, int primitiveIndex) {
     RenderableManager const *rm = (RenderableManager const *) nativeRenderableManager;
     AttributeBitset enabled = rm->getEnabledAttributesAt((RenderableManager::Instance) i, (size_t) primitiveIndex);
